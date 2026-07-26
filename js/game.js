@@ -1,6 +1,8 @@
 let gameState = JSON.parse(JSON.stringify(defaultConfig));
 let activeTabMap1 = 'leaf';
 let activeTabMap2 = 'pine_leaf';
+let activeTabMap3 = 'broad_leaf'; // 新增
+let activeTabMap4 = 'sakura_leaf'; // 新增
 
 // ==================== 0. 數字格式化與進位引擎 ====================
 
@@ -73,12 +75,22 @@ function getRobotYield(robotId) {
     let upgKey = '';
     let presUpgKey = '';
 
+    // Map 1
     if (robotId === 'sweeper') { upgKey = 'leaf_amount'; presUpgKey = 'pres_leaf_boost'; }
     if (robotId === 'branchCollector') { upgKey = 'branch_amount'; presUpgKey = 'pres_branch_boost'; }
     if (robotId === 'lumberjack') { upgKey = 'wood_amount'; presUpgKey = 'pres_wood_boost'; }
+    // Map 2
     if (robotId === 'pineSweeper') { upgKey = 'pine_leaf_amount'; presUpgKey = 'pres_pine_leaf_boost'; }
     if (robotId === 'pineBranchCollector') { upgKey = 'pine_branch_amount'; presUpgKey = 'pres_pine_branch_boost'; }
     if (robotId === 'pineLumberjack') { upgKey = 'pine_wood_amount'; presUpgKey = 'pres_pine_wood_boost'; }
+    // Map 3
+    if (robotId === 'broadSweeper') { upgKey = 'broad_leaf_amount'; presUpgKey = 'pres_broad_leaf_boost'; }
+    if (robotId === 'broadBranchCollector') { upgKey = 'broad_branch_amount'; presUpgKey = 'pres_broad_branch_boost'; }
+    if (robotId === 'broadLumberjack') { upgKey = 'broad_wood_amount'; presUpgKey = 'pres_broad_wood_boost'; }
+    // Map 4
+    if (robotId === 'sakuraSweeper') { upgKey = 'sakura_leaf_amount'; presUpgKey = 'pres_sakura_leaf_boost'; }
+    if (robotId === 'sakuraBranchCollector') { upgKey = 'sakura_branch_amount'; presUpgKey = 'pres_sakura_branch_boost'; }
+    if (robotId === 'sakuraLumberjack') { upgKey = 'sakura_wood_amount'; presUpgKey = 'pres_sakura_wood_boost'; }
 
     if (upgKey) {
         let level = gameState.upgrades[upgKey]?.level || 0;
@@ -100,24 +112,44 @@ function getRobotYield(robotId) {
 function getRobotInterval(robotId) {
     let base = gameState.robots[robotId].baseInterval;
     let speedLevel = 0;
+    // Map 1
     if (robotId === 'sweeper') speedLevel = gameState.upgrades.leaf_speed?.level || 0;
     if (robotId === 'branchCollector') speedLevel = gameState.upgrades.branch_speed?.level || 0;
     if (robotId === 'lumberjack') speedLevel = gameState.upgrades.wood_speed?.level || 0;
+    // Map 2
     if (robotId === 'pineSweeper') speedLevel = gameState.upgrades.pine_leaf_speed?.level || 0;
     if (robotId === 'pineBranchCollector') speedLevel = gameState.upgrades.pine_branch_speed?.level || 0;
     if (robotId === 'pineLumberjack') speedLevel = gameState.upgrades.pine_wood_speed?.level || 0;
+    // Map 3
+    if (robotId === 'broadSweeper') speedLevel = gameState.upgrades.broad_leaf_speed?.level || 0;
+    if (robotId === 'broadBranchCollector') speedLevel = gameState.upgrades.broad_branch_speed?.level || 0;
+    if (robotId === 'broadLumberjack') speedLevel = gameState.upgrades.broad_wood_speed?.level || 0;
+    // Map 4
+    if (robotId === 'sakuraSweeper') speedLevel = gameState.upgrades.sakura_leaf_speed?.level || 0;
+    if (robotId === 'sakuraBranchCollector') speedLevel = gameState.upgrades.sakura_branch_speed?.level || 0;
+    if (robotId === 'sakuraLumberjack') speedLevel = gameState.upgrades.sakura_wood_speed?.level || 0;
 
     return Math.max(0.1, base - (speedLevel * 0.01));
 }
 
 function getRobotTotalCount(robotId) {
     let count = gameState.robots[robotId].baseCount || 0;
+    // Map 1
     if (robotId === 'sweeper') count += (gameState.upgrades.leaf_count?.level || 0);
     if (robotId === 'branchCollector') count += (gameState.upgrades.branch_count?.level || 0);
     if (robotId === 'lumberjack') count += (gameState.upgrades.wood_count?.level || 0);
+    // Map 2
     if (robotId === 'pineSweeper') count += (gameState.upgrades.pine_leaf_count?.level || 0);
     if (robotId === 'pineBranchCollector') count += (gameState.upgrades.pine_branch_count?.level || 0);
     if (robotId === 'pineLumberjack') count += (gameState.upgrades.pine_wood_count?.level || 0);
+    // Map 3
+    if (robotId === 'broadSweeper') count += (gameState.upgrades.broad_leaf_count?.level || 0);
+    if (robotId === 'broadBranchCollector') count += (gameState.upgrades.broad_branch_count?.level || 0);
+    if (robotId === 'broadLumberjack') count += (gameState.upgrades.broad_wood_count?.level || 0);
+    // Map 4
+    if (robotId === 'sakuraSweeper') count += (gameState.upgrades.sakura_leaf_count?.level || 0);
+    if (robotId === 'sakuraBranchCollector') count += (gameState.upgrades.sakura_branch_count?.level || 0);
+    if (robotId === 'sakuraLumberjack') count += (gameState.upgrades.sakura_wood_count?.level || 0);
     return count;
 }
 
@@ -135,6 +167,12 @@ function calculatePrestigeCoinGain() {
                  + (r.pine_leaf.lifetimeAmount || 0) * 0.000002
                  + (r.pine_branch.lifetimeAmount || 0) * 0.00001
                  + (r.pine_wood.lifetimeAmount || 0) * 0.00002
+                 + (r.broad_leaf.lifetimeAmount || 0) * 0.000004 // 闊葉
+                 + (r.broad_branch.lifetimeAmount || 0) * 0.00002 // 闊枝
+                 + (r.broad_wood.lifetimeAmount || 0) * 0.00004 // 闊木
+                 + (r.sakura_leaf.lifetimeAmount || 0) * 0.000008 // 櫻花
+                 + (r.sakura_branch.lifetimeAmount || 0) * 0.00004 // 櫻枝
+                 + (r.sakura_wood.lifetimeAmount || 0) * 0.00008 // 櫻木
                  + (r.recycle_coin.lifetimeAmount || 0) * 0.0015;
 
     let bonusMultiplier = 1 + ((gameState.upgrades.pres_coin_boost?.level || 0) * 0.01);
@@ -159,7 +197,10 @@ function processTick(deltaTime) {
     Object.values(gameState.robots).forEach(bot => {
         if (!bot.unlocked) return;
 
-        let isMapUnlocked = (bot.map === 'map1') || (bot.map === 'map2' && gameState.unlockedMap2);
+        let isMapUnlocked = (bot.map === 'map1') 
+            || (bot.map === 'map2' && gameState.unlockedMap2)
+            || (bot.map === 'map3' && gameState.unlockedMap3)
+            || (bot.map === 'map4' && gameState.unlockedMap4);
         if (!isMapUnlocked) return;
 
         let totalCount = getRobotTotalCount(bot.id);
@@ -271,12 +312,15 @@ function executePrestige() {
                     gameState.upgrades[k].level = 1;
                 }
             } else {
+                // 非 pres_ 開頭的普通科技與地圖解鎖 (unlock_map3, unlock_map4 均會被歸零，每次需要重新買門檻)
                 gameState.upgrades[k].level = (k === 'recycle_amount') ? 1 : 0;
             }
         });
 
         gameState.unlockedRecycle = false;
         gameState.unlockedMap2 = false;
+        gameState.unlockedMap3 = false; // 重置
+        gameState.unlockedMap4 = false; // 重置
         gameState.recycleTimer = 0;
         Object.keys(gameState.recycles).forEach(k => {
             gameState.recycles[k].enabled = false;
@@ -321,10 +365,12 @@ function togglePrestigeView() {
 
 function switchView(viewId) {
     if (viewId === 'map2' && !gameState.unlockedMap2) return;
+    if (viewId === 'map3' && !gameState.unlockedMap3) return;
+    if (viewId === 'map4' && !gameState.unlockedMap4) return;
     if (viewId === 'recycle' && !gameState.unlockedRecycle) return;
     if (viewId === 'prestige' && !gameState.unlockedPrestige) return;
 
-    if (viewId === 'map1' || viewId === 'map2') {
+    if (viewId === 'map1' || viewId === 'map2' || viewId === 'map3' || viewId === 'map4') {
         gameState.lastMap = viewId;
     }
 
@@ -343,7 +389,7 @@ function switchView(viewId) {
 }
 
 function initUI() {
-    const hasMapSystem = gameState.unlockedMap2;
+    const hasMapSystem = gameState.unlockedMap2 || gameState.unlockedMap3 || gameState.unlockedMap4;
     const hasRecycleSystem = gameState.unlockedRecycle;
     const hasPrestigeSystem = gameState.unlockedPrestige;
 
@@ -365,6 +411,14 @@ function initUI() {
         navTabs.style.display = 'none';
     }
 
+    // 控制頂部選單按鈕的顯隱
+    const navMap2Btn = document.getElementById('nav-map2');
+    if (navMap2Btn) navMap2Btn.style.display = gameState.unlockedMap2 ? 'inline-block' : 'none';
+    const navMap3Btn = document.getElementById('nav-map3');
+    if (navMap3Btn) navMap3Btn.style.display = gameState.unlockedMap3 ? 'inline-block' : 'none';
+    const navMap4Btn = document.getElementById('nav-map4');
+    if (navMap4Btn) navMap4Btn.style.display = gameState.unlockedMap4 ? 'inline-block' : 'none';
+
     // 初始化格式切換器開關狀態
     const toggleEl = document.getElementById('number-format-toggle');
     if (toggleEl) {
@@ -383,8 +437,9 @@ function initUI() {
         `;
     });
 
-    ['map1', 'map2'].forEach(mapKey => {
+    ['map1', 'map2', 'map3', 'map4'].forEach(mapKey => {
         const list = document.getElementById(`robot-list-${mapKey}`);
+        if (!list) return;
         list.innerHTML = '';
         Object.values(gameState.robots).filter(r => r.map === mapKey).forEach(bot => {
             if (!bot.unlocked) return;
@@ -408,18 +463,40 @@ function initUI() {
     });
 
     const tab1 = document.getElementById('tab-container-map1');
-    tab1.innerHTML = '';
-    ['leaf', 'branch', 'wood'].forEach(resKey => {
-        if (!gameState.resources[resKey]?.unlocked) return;
-        tab1.innerHTML += `<button class="tab-btn ${activeTabMap1 === resKey ? 'active' : ''}" onclick="switchCategoryTab('map1', '${resKey}')">${gameState.resources[resKey].name}</button>`;
-    });
+    if (tab1) {
+        tab1.innerHTML = '';
+        ['leaf', 'branch', 'wood'].forEach(resKey => {
+            if (!gameState.resources[resKey]?.unlocked) return;
+            tab1.innerHTML += `<button class="tab-btn ${activeTabMap1 === resKey ? 'active' : ''}" onclick="switchCategoryTab('map1', '${resKey}', this)">${gameState.resources[resKey].name}</button>`;
+        });
+    }
 
     const tab2 = document.getElementById('tab-container-map2');
-    tab2.innerHTML = '';
-    ['pine_leaf', 'pine_branch', 'pine_wood'].forEach(resKey => {
-        if (!gameState.resources[resKey]?.unlocked) return;
-        tab2.innerHTML += `<button class="tab-btn ${activeTabMap2 === resKey ? 'active' : ''}" onclick="switchCategoryTab('map2', '${resKey}')">${gameState.resources[resKey].name}</button>`;
-    });
+    if (tab2) {
+        tab2.innerHTML = '';
+        ['pine_leaf', 'pine_branch', 'pine_wood'].forEach(resKey => {
+            if (!gameState.resources[resKey]?.unlocked) return;
+            tab2.innerHTML += `<button class="tab-btn ${activeTabMap2 === resKey ? 'active' : ''}" onclick="switchCategoryTab('map2', '${resKey}', this)">${gameState.resources[resKey].name}</button>`;
+        });
+    }
+
+    const tab3 = document.getElementById('tab-container-map3');
+    if (tab3) {
+        tab3.innerHTML = '';
+        ['broad_leaf', 'broad_branch', 'broad_wood'].forEach(resKey => {
+            if (!gameState.resources[resKey]?.unlocked) return;
+            tab3.innerHTML += `<button class="tab-btn ${activeTabMap3 === resKey ? 'active' : ''}" onclick="switchCategoryTab('map3', '${resKey}', this)">${gameState.resources[resKey].name}</button>`;
+        });
+    }
+
+    const tab4 = document.getElementById('tab-container-map4');
+    if (tab4) {
+        tab4.innerHTML = '';
+        ['sakura_leaf', 'sakura_branch', 'sakura_wood'].forEach(resKey => {
+            if (!gameState.resources[resKey]?.unlocked) return;
+            tab4.innerHTML += `<button class="tab-btn ${activeTabMap4 === resKey ? 'active' : ''}" onclick="switchCategoryTab('map4', '${resKey}', this)">${gameState.resources[resKey].name}</button>`;
+        });
+    }
 
     const recList = document.getElementById('recycle-options-list');
     recList.innerHTML = '';
@@ -441,18 +518,28 @@ function initUI() {
     switchView(gameState.currentView || 'map1');
 }
 
-function switchCategoryTab(map, category) {
+function switchCategoryTab(map, category, element) {
     if (map === 'map1') activeTabMap1 = category;
     if (map === 'map2') activeTabMap2 = category;
+    if (map === 'map3') activeTabMap3 = category;
+    if (map === 'map4') activeTabMap4 = category;
     
     document.querySelectorAll(`#tab-container-${map} .tab-btn`).forEach(b => b.classList.remove('active'));
-    if (event) event.target.classList.add('active');
+    if (element) {
+        element.classList.add('active');
+    } else if (event) {
+        event.target.classList.add('active');
+    }
 
     renderUpgradeList();
 }
 
 function renderUpgradeList() {
-    let activeCategory = (gameState.currentView === 'map1') ? activeTabMap1 : activeTabMap2;
+    let activeCategory = 'leaf';
+    if (gameState.currentView === 'map1') activeCategory = activeTabMap1;
+    else if (gameState.currentView === 'map2') activeCategory = activeTabMap2;
+    else if (gameState.currentView === 'map3') activeCategory = activeTabMap3;
+    else if (gameState.currentView === 'map4') activeCategory = activeTabMap4;
     if (gameState.currentView === 'recycle') activeCategory = 'recycle';
     if (gameState.currentView === 'prestige') activeCategory = 'prestige';
 
@@ -537,7 +624,11 @@ function updateDynamicValues() {
         if (barEl) barEl.style.width = `${progress}%`;
     });
 
-    let activeCategory = (gameState.currentView === 'map1') ? activeTabMap1 : activeTabMap2;
+    let activeCategory = 'leaf';
+    if (gameState.currentView === 'map1') activeCategory = activeTabMap1;
+    else if (gameState.currentView === 'map2') activeCategory = activeTabMap2;
+    else if (gameState.currentView === 'map3') activeCategory = activeTabMap3;
+    else if (gameState.currentView === 'map4') activeCategory = activeTabMap4;
     if (gameState.currentView === 'recycle') activeCategory = 'recycle';
     if (gameState.currentView === 'prestige') activeCategory = 'prestige';
 
@@ -618,6 +709,8 @@ function mergeSaveData(saved, template) {
     if (saved.lastInterestTime) merged.lastInterestTime = saved.lastInterestTime;
     if (saved.unlockedRecycle !== undefined) merged.unlockedRecycle = saved.unlockedRecycle;
     if (saved.unlockedMap2 !== undefined) merged.unlockedMap2 = saved.unlockedMap2;
+    if (saved.unlockedMap3 !== undefined) merged.unlockedMap3 = saved.unlockedMap3; // 新增
+    if (saved.unlockedMap4 !== undefined) merged.unlockedMap4 = saved.unlockedMap4; // 新增
     if (saved.unlockedPrestige !== undefined) merged.unlockedPrestige = saved.unlockedPrestige;
     if (saved.currentView) merged.currentView = saved.currentView;
     if (saved.lastMap) merged.lastMap = saved.lastMap;
@@ -700,6 +793,45 @@ function restoreUnlocksFromUpgrades() {
     if (gameState.upgrades.unlock_prestige?.level > 0) {
         gameState.unlockedPrestige = true;
         gameState.resources.prestige_coin.unlocked = true;
+    }
+    // Map 3 解鎖還原
+    if (gameState.upgrades.unlock_broad_robot?.level > 0) {
+        gameState.resources.broad_leaf.unlocked = true;
+        gameState.robots.broadSweeper.unlocked = true;
+        if (gameState.robots.broadSweeper.baseCount === 0) gameState.robots.broadSweeper.baseCount = 1;
+    }
+    if (gameState.upgrades.unlock_broad_branch_robot?.level > 0) {
+        gameState.resources.broad_branch.unlocked = true;
+        gameState.robots.broadBranchCollector.unlocked = true;
+        if (gameState.robots.broadBranchCollector.baseCount === 0) gameState.robots.broadBranchCollector.baseCount = 1;
+    }
+    if (gameState.upgrades.unlock_broad_wood_robot?.level > 0) {
+        gameState.resources.broad_wood.unlocked = true;
+        gameState.robots.broadLumberjack.unlocked = true;
+        if (gameState.robots.broadLumberjack.baseCount === 0) gameState.robots.broadLumberjack.baseCount = 1;
+    }
+    // Map 4 解鎖還原
+    if (gameState.upgrades.unlock_sakura_robot?.level > 0) {
+        gameState.resources.sakura_leaf.unlocked = true;
+        gameState.robots.sakuraSweeper.unlocked = true;
+        if (gameState.robots.sakuraSweeper.baseCount === 0) gameState.robots.sakuraSweeper.baseCount = 1;
+    }
+    if (gameState.upgrades.unlock_sakura_branch_robot?.level > 0) {
+        gameState.resources.sakura_branch.unlocked = true;
+        gameState.robots.sakuraBranchCollector.unlocked = true;
+        if (gameState.robots.sakuraBranchCollector.baseCount === 0) gameState.robots.sakuraBranchCollector.baseCount = 1;
+    }
+    if (gameState.upgrades.unlock_sakura_wood_robot?.level > 0) {
+        gameState.resources.sakura_wood.unlocked = true;
+        gameState.robots.sakuraLumberjack.unlocked = true;
+        if (gameState.robots.sakuraLumberjack.baseCount === 0) gameState.robots.sakuraLumberjack.baseCount = 1;
+    }
+    // 地圖天賦解鎖還原 (新增)
+    if (gameState.upgrades.unlock_map3?.level > 0) {
+        gameState.unlockedMap3 = true;
+    }
+    if (gameState.upgrades.unlock_map4?.level > 0) {
+        gameState.unlockedMap4 = true;
     }
 }
 
