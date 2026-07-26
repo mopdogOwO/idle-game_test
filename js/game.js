@@ -83,12 +83,12 @@ function getRecycleInterval() {
 function calculatePrestigeCoinGain() {
     let r = gameState.resources;
     let rawCoins = (r.leaf.lifetimeAmount || 0) * 0.000001
-                 + (r.branch.lifetimeAmount || 0) * 0.000004
+                 + (r.branch.lifetimeAmount || 0) * 0.000005
                  + (r.wood.lifetimeAmount || 0) * 0.00001
                  + (r.pine_leaf.lifetimeAmount || 0) * 0.000002
-                 + (r.pine_branch.lifetimeAmount || 0) * 0.000006
+                 + (r.pine_branch.lifetimeAmount || 0) * 0.00001
                  + (r.pine_wood.lifetimeAmount || 0) * 0.00002
-                 + (r.recycle_coin.lifetimeAmount || 0) * 0.001;
+                 + (r.recycle_coin.lifetimeAmount || 0) * 0.0015;
 
     let bonusMultiplier = 1 + ((gameState.upgrades.pres_coin_boost?.level || 0) * 0.01);
     return Math.round(rawCoins * bonusMultiplier);
