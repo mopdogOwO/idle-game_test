@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>純掛機：樹林大革命 v2.5 (初級轉生版)</title>
-    <link rel="stylesheet" href="css/style.css?v=1.0.2">
+    <link rel="stylesheet" href="css/style.css?v=1.0.2a">
 </head>
 <body>
 
@@ -15,79 +15,97 @@
     <!-- 轉生動畫 Overlay -->
     <div id="prestige-overlay">✨ 初級轉生中... 重塑森林與大地 ✨</div>
 
-    <!-- 頂部導覽列 -->
-    <div class="nav-tabs" id="main-nav-tabs" style="display: none;">
-        <div class="nav-group" id="nav-group-maps" style="display: none;">
-            <button class="nav-btn active" id="nav-map1" onclick="switchView('map1')">🌲 平原樹林</button>
-            <button class="nav-btn" id="nav-map2" onclick="switchView('map2')">❄️ 寒帶針葉林</button>
-        </div>
-
-        <div class="nav-divider" id="nav-divider-1" style="display: none;"></div>
-
-        <div class="nav-group" id="nav-group-features" style="display: none;">
-            <button class="nav-btn feature-btn" id="nav-recycle" onclick="toggleRecycleView()">♻️ 回收廠</button>
-        </div>
-
-        <div class="nav-divider" id="nav-divider-2" style="display: none;"></div>
-
-        <div class="nav-group" id="nav-group-prestige" style="display: none;">
-            <button class="nav-btn prestige-btn" id="nav-prestige" onclick="switchView('prestige')">🔮 初級轉生</button>
-        </div>
-    </div>
-
-    <div class="resource-container" id="resource-container"></div>
-
-    <div class="page-view active" id="page-map1">
-        <div class="section-box">
-            <div class="section-title">⚙️ 機器人運作狀態 (平原)</div>
-            <div id="robot-list-map1"></div>
-        </div>
-        <div class="section-box">
-            <div class="section-title">🛠️ 升級中心</div>
-            <div class="tab-container" id="tab-container-map1"></div>
-            <div class="upgrade-list" id="upgrade-list-map1"></div>
-        </div>
-    </div>
-
-    <div class="page-view" id="page-map2">
-        <div class="section-box">
-            <div class="section-title">⚙️ 機器人運作狀態 (寒帶)</div>
-            <div id="robot-list-map2"></div>
-        </div>
-        <div class="section-box">
-            <div class="section-title">🛠️ 升級中心</div>
-            <div class="tab-container" id="tab-container-map2"></div>
-            <div class="upgrade-list" id="upgrade-list-map2"></div>
-        </div>
-    </div>
-
-    <div class="page-view" id="page-recycle">
-        <div class="section-box">
-            <div class="section-title">♻️ 回收轉換開關 (週期: <span id="recycle-timer-desc">10.0</span> 秒)</div>
-            <div class="progress-bar-container" style="margin-bottom: 15px;">
-                <div class="progress-bar" id="recycle-bar"></div>
+    <!-- 遊戲主要版面配置 -->
+    <div class="game-layout">
+        
+        <!-- 左側/上方：資源與進位切換欄 -->
+        <aside class="sidebar-resources">
+            <div class="toggle-container">
+                <span>科學 (e)</span>
+                <label class="switch">
+                    <input type="checkbox" id="number-format-toggle" onchange="toggleNumberFormat(this.checked)">
+                    <span class="slider"></span>
+                </label>
+                <span>簡寫 (K-zz)</span>
             </div>
-            <div id="recycle-options-list"></div>
-        </div>
-        <div class="section-box">
-            <div class="section-title">🛠️ 回收廠科技升級</div>
-            <div class="upgrade-list" id="upgrade-list-recycle"></div>
-        </div>
-    </div>
+            <div class="resource-container" id="resource-container"></div>
+        </aside>
 
-    <div class="page-view" id="page-prestige">
-        <div class="section-box">
-            <div class="prestige-box">
-                <h2>🔮 進行初級轉生</h2>
-                <p>將當前平原樹林、寒帶針葉林與回收廠的進度重置，換取強大的初級轉生硬幣！</p>
-                <p style="font-size: 1.1rem; color: #4cc9f0; margin-bottom: 20px;">
-                    轉生後可獲得：<b id="prestige-gain-preview" style="font-size: 1.5rem; color: #ffd166;">0</b> 個初級轉生硬幣
-                </p>
-                <button class="prestige-btn-main" onclick="executePrestige()">立即轉生</button>
+        <!-- 右側/下方：主頁面內容 -->
+        <main class="game-main">
+            <!-- 頂部導覽列 -->
+            <div class="nav-tabs" id="main-nav-tabs" style="display: none;">
+                <div class="nav-group" id="nav-group-maps" style="display: none;">
+                    <button class="nav-btn active" id="nav-map1" onclick="switchView('map1')">🌲 平原樹林</button>
+                    <button class="nav-btn" id="nav-map2" onclick="switchView('map2')">❄️ 寒帶針葉林</button>
+                </div>
+
+                <div class="nav-divider" id="nav-divider-1" style="display: none;"></div>
+
+                <div class="nav-group" id="nav-group-features" style="display: none;">
+                    <button class="nav-btn feature-btn" id="nav-recycle" onclick="toggleRecycleView()">♻️ 回收廠</button>
+                </div>
+
+                <div class="nav-divider" id="nav-divider-2" style="display: none;"></div>
+
+                <div class="nav-group" id="nav-group-prestige" style="display: none;">
+                    <button class="nav-btn prestige-btn" id="nav-prestige" onclick="togglePrestigeView()">🔮 初級轉生</button>
+                </div>
             </div>
-            <div class="section-title">🔮 初級轉生科技天賦</div>
-            <div class="upgrade-list" id="upgrade-list-prestige"></div>
-        </div>
+
+            <div class="page-view active" id="page-map1">
+                <div class="section-box">
+                    <div class="section-title">⚙️ 機器人運作狀態 (平原)</div>
+                    <div id="robot-list-map1"></div>
+                </div>
+                <div class="section-box">
+                    <div class="section-title">🛠️ 升級中心</div>
+                    <div class="tab-container" id="tab-container-map1"></div>
+                    <div class="upgrade-list" id="upgrade-list-map1"></div>
+                </div>
+            </div>
+
+            <div class="page-view" id="page-map2">
+                <div class="section-box">
+                    <div class="section-title">⚙️ 機器人運作狀態 (寒帶)</div>
+                    <div id="robot-list-map2"></div>
+                </div>
+                <div class="section-box">
+                    <div class="section-title">🛠️ 升級中心</div>
+                    <div class="tab-container" id="tab-container-map2"></div>
+                    <div class="upgrade-list" id="upgrade-list-map2"></div>
+                </div>
+            </div>
+
+            <div class="page-view" id="page-recycle">
+                <div class="section-box">
+                    <div class="section-title">♻️ 回收轉換開關 (週期: <span id="recycle-timer-desc">10.0</span> 秒)</div>
+                    <div class="progress-bar-container" style="margin-bottom: 15px;">
+                        <div class="progress-bar" id="recycle-bar"></div>
+                    </div>
+                    <div id="recycle-options-list"></div>
+                </div>
+                <div class="section-box">
+                    <div class="section-title">🛠️ 回收廠科技升級</div>
+                    <div class="upgrade-list" id="upgrade-list-recycle"></div>
+                </div>
+            </div>
+
+            <div class="page-view" id="page-prestige">
+                <div class="section-box">
+                    <div class="prestige-box">
+                        <h2>🔮 進行初級轉生</h2>
+                        <p>將當前平原樹林、寒帶針葉林與回收廠的進度重置，換取強大的初級轉生硬幣！</p>
+                        <p style="font-size: 1.1rem; color: #4cc9f0; margin-bottom: 20px;">
+                            轉生後可獲得：<b id="prestige-gain-preview" style="font-size: 1.5rem; color: #ffd166;">0</b> 個初級轉生硬幣
+                        </p>
+                        <button class="prestige-btn-main" id="prestige-btn" onclick="executePrestige()">立即轉生</button>
+                    </div>
+                    <div class="section-title">🔮 初級轉生科技天賦</div>
+                    <div class="upgrade-list" id="upgrade-list-prestige"></div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <footer>
@@ -98,7 +116,7 @@
     </footer>
 
     <!-- 載入腳本：先載入資料設定檔，再載入邏輯控制檔 -->
-    <script src="js/data.js?v=1.0.2"></script>
-    <script src="js/game.js?v=1.0.2"></script>
+    <script src="js/data.js?v=1.0.2a"></script>
+    <script src="js/game.js?v=1.0.2a"></script>
 </body>
 </html>

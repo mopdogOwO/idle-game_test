@@ -2,6 +2,53 @@ let gameState = JSON.parse(JSON.stringify(defaultConfig));
 let activeTabMap1 = 'leaf';
 let activeTabMap2 = 'pine_leaf';
 
+// ==================== 0. 數字格式化與進位引擎 ====================
+
+function formatNumber(num, keepDecimalsForSmall = false) {
+    if (num === undefined || isNaN(num)) return '0';
+    if (num < 1000) {
+        if (keepDecimalsForSmall) {
+            return num % 1 === 0 ? num.toString() : num.toFixed(1);
+        }
+        return Math.floor(num).toString();
+    }
+
+    let isAbbrev = (gameState.numberFormat !== 'scientific');
+
+    if (isAbbrev) {
+        let tier = Math.floor(Math.log10(num) / 3);
+        let suffix = getSuffix(tier);
+        let scale = Math.pow(10, tier * 3);
+        let scaled = num / scale;
+        let formatted = parseFloat(scaled.toFixed(2));
+        return formatted + suffix;
+    } else {
+        let exp = Math.floor(Math.log10(num));
+        let base = num / Math.pow(10, exp);
+        let formattedBase = parseFloat(base.toFixed(2));
+        return `${formattedBase}e${exp}`;
+    }
+}
+
+function getSuffix(index) {
+    const baseSuffixes = ['', 'K', 'M', 'B', 'T'];
+    if (index < baseSuffixes.length) return baseSuffixes[index];
+    let adjIndex = index - baseSuffixes.length;
+    
+    // 如果大於 aa-zz (10^2040) 的極限值，則直接回退科學記號
+    if (adjIndex >= 676) return 'e' + (index * 3);
+
+    let firstChar = String.fromCharCode(97 + Math.floor(adjIndex / 26)); // 97 代表小寫 'a'
+    let secondChar = String.fromCharCode(97 + (adjIndex % 26));
+    return firstChar + secondChar;
+}
+
+function toggleNumberFormat(isChecked) {
+    gameState.numberFormat = isChecked ? 'abbreviation' : 'scientific';
+    saveGame();
+    updateDynamicValues();
+}
+
 // ==================== 1. 核心邏輯 ====================
 
 function addResource(resId, amount) {
@@ -145,8 +192,8 @@ function processTick(deltaTime) {
 }
 
 function runRecycleCycle() {
-    let effLv = gameState.upgrades.recycle_efficiency?.level || 0;
-    let discountMultiplier = 1 - (effLv * 0.01);
+    let effLv = (gameState.upgrades.recycle_efficiency?.level || 0) + (gameState.upgrades.pres_recycle_efficiency?.level || 0);
+    let discountMultiplier = Math.max(0, 1 - (effLv * 0.01));
     let coinMultiplier = gameState.upgrades.recycle_amount?.level || 1;
     let presRecycleBoost = gameState.upgrades.pres_recycle_boost?.level || 1;
 
@@ -184,11 +231,14 @@ function processInterest(now) {
 }
 
 function executePrestige() {
+	if (!gameState.resources.pine_wood?.unlocked) {
+        return;
+    }
     let gainedCoins = calculatePrestigeCoinGain();
     if (gainedCoins <= 0) {
         if (!confirm('你目前轉生無法獲得任何初級硬幣，確定要轉生嗎？')) return;
     } else {
-        if (!confirm(`確定要進行初級轉生嗎？你將獲得 ${gainedCoins.toLocaleString()} 個初級轉生硬幣！`)) return;
+        if (!confirm(`確定要進行初級轉生嗎？你將獲得 ${formatNumber(gainedCoins)} 個初級轉生硬幣！`)) return;
     }
 
     const overlay = document.getElementById('prestige-overlay');
@@ -211,9 +261,13 @@ function executePrestige() {
             gameState.robots[k].currentTimer = 0;
         });
 
-        Object.keys(gameState.upgrades).forEach(k => {
+		Object.keys(gameState.upgrades).forEach(k => {
             if (k.startsWith('pres_')) {
-                if (k !== 'pres_coin_boost' && k !== 'pres_interest') {
+                if (k === 'pres_coin_boost') {
+                    // 第 9 項：不重置
+                } else if (k === 'pres_recycle_efficiency') {
+                    gameState.upgrades[k].level = 0;
+                } else {
                     gameState.upgrades[k].level = 1;
                 }
             } else {
@@ -247,6 +301,21 @@ function toggleRecycleView() {
         switchView(gameState.lastMap || 'map1');
     } else {
         switchView('recycle');
+    }
+}
+
+function togglePrestigeView() {
+    if (!gameState.unlockedPrestige) {
+        if (typeof showToast === 'function') {
+            showToast('轉生系統尚未解鎖！');
+        }
+        return;
+    }
+
+    if (gameState.currentView === 'prestige') {
+        switchView(gameState.lastMap || 'map1');
+    } else {
+        switchView('prestige');
     }
 }
 
@@ -294,6 +363,12 @@ function initUI() {
         navDivider2.style.display = ((hasMapSystem || hasRecycleSystem) && hasPrestigeSystem) ? 'block' : 'none';
     } else {
         navTabs.style.display = 'none';
+    }
+
+    // 初始化格式切換器開關狀態
+    const toggleEl = document.getElementById('number-format-toggle');
+    if (toggleEl) {
+        toggleEl.checked = (gameState.numberFormat !== 'scientific');
     }
 
     const resContainer = document.getElementById('resource-container');
@@ -381,9 +456,7 @@ function renderUpgradeList() {
     if (gameState.currentView === 'recycle') activeCategory = 'recycle';
     if (gameState.currentView === 'prestige') activeCategory = 'prestige';
 
-    const targetContainerId = (gameState.currentView === 'recycle' || gameState.currentView === 'prestige') 
-        ? `upgrade-list-${gameState.currentView}` 
-        : `upgrade-list-${gameState.currentView}`;
+    const targetContainerId = `upgrade-list-${gameState.currentView}`;
     
     const listContainer = document.getElementById(targetContainerId);
     if (!listContainer) return;
@@ -406,7 +479,7 @@ function renderUpgradeList() {
                     <div class="upgrade-title">${upg.name} <span style="color:#57cc99">${levelText}</span></div>
                     <div class="upgrade-desc">${upg.desc}</div>
                     <div class="upgrade-cost">
-                        ${isMax ? '<span style="color:#8d99ae">已達最大等級</span>' : `消耗: ${cost.toLocaleString()} ${costRes.name}`}
+                        ${isMax ? '<span style="color:#8d99ae">已達最大等級</span>' : `消耗: ${formatNumber(cost)} ${costRes.name}`}
                     </div>
                 </div>
                 <button class="buy-btn" id="buy-btn-${upg.id}" onclick="buyUpgrade('${upg.id}')">
@@ -440,7 +513,7 @@ function updateDynamicValues() {
     Object.values(gameState.resources).forEach(res => {
         if (!res.unlocked) return;
         const el = document.getElementById(`res-val-${res.id}`);
-        if (el) el.innerText = Math.floor(res.amount).toLocaleString();
+        if (el) el.innerText = formatNumber(res.amount);
     });
 
     Object.values(gameState.robots).forEach(bot => {
@@ -458,9 +531,9 @@ function updateDynamicValues() {
         const barEl = document.getElementById(`bot-bar-${bot.id}`);
 
         if (countEl) countEl.innerText = `${totalCount} 台`;
-        if (yieldEl) yieldEl.innerText = `單次: ${yieldPerBot}`;
+        if (yieldEl) yieldEl.innerText = `單次: ${formatNumber(yieldPerBot)}`;
         if (intervalEl) intervalEl.innerText = `週期: ${interval.toFixed(2)}s`;
-        if (spsEl) spsEl.innerText = `秒產: ${((yieldPerBot * totalCount) / interval).toFixed(1)}/s`;
+        if (spsEl) spsEl.innerText = `秒產: ${formatNumber(((yieldPerBot * totalCount) / interval), true)}/s`;
         if (barEl) barEl.style.width = `${progress}%`;
     });
 
@@ -478,10 +551,10 @@ function updateDynamicValues() {
         if (btn) btn.disabled = !canAfford || isMax;
     });
 
-    if (gameState.unlockedRecycle) {
+	if (gameState.unlockedRecycle) {
         let recInterval = getRecycleInterval();
-        let effLv = gameState.upgrades.recycle_efficiency?.level || 0;
-        let discountMultiplier = 1 - (effLv * 0.01);
+        let effLv = (gameState.upgrades.recycle_efficiency?.level || 0) + (gameState.upgrades.pres_recycle_efficiency?.level || 0);
+        let discountMultiplier = Math.max(0, 1 - (effLv * 0.01));
         let coinMultiplier = gameState.upgrades.recycle_amount?.level || 1;
         let presRecycleBoost = gameState.upgrades.pres_recycle_boost?.level || 1;
 
@@ -502,7 +575,7 @@ function updateDynamicValues() {
             const descEl = document.getElementById(`rec-desc-${rec.id}`);
 
             if (titleEl) {
-                titleEl.innerText = `${actualCost.toLocaleString()} ${costResName} ➔ ${actualGain.toLocaleString()} ${gainResName}`;
+                titleEl.innerText = `${costResName} ➔ ${gainResName}`;
             }
 
             if (descEl) {
@@ -510,14 +583,26 @@ function updateDynamicValues() {
                 let gainBonusText = (rec.isCoin && coinMultiplier > 1) ? `<span style="color:#ffd166;">(${coinMultiplier}倍加成)</span>` : '';
                 if (!rec.isCoin && presRecycleBoost > 1) gainBonusText = `<span style="color:#e0aaff;">(${presRecycleBoost}倍轉生加成)</span>`;
 
-                descEl.innerHTML = `單次消耗: <b>${actualCost.toLocaleString()}</b> ${costResName} ${costBonusText} | 單次獲得: <b>${actualGain.toLocaleString()}</b> ${gainResName} ${gainBonusText}`;
+                descEl.innerHTML = `單次消耗: <b>${formatNumber(actualCost)}</b> ${costResName} ${costBonusText} | 單次獲得: <b>${formatNumber(actualGain)}</b> ${gainResName} ${gainBonusText}`;
             }
         });
     }
 
-    if (gameState.unlockedPrestige) {
+	if (gameState.unlockedPrestige) {
         const previewEl = document.getElementById('prestige-gain-preview');
-        if (previewEl) previewEl.innerText = calculatePrestigeCoinGain().toLocaleString();
+        if (previewEl) previewEl.innerText = formatNumber(calculatePrestigeCoinGain());
+
+        const prestigeBtn = document.getElementById('prestige-btn'); 
+        if (prestigeBtn) {
+            const isPineUnlocked = gameState.resources.pine_wood?.unlocked || false;
+            if (isPineUnlocked) {
+                prestigeBtn.disabled = false;
+                prestigeBtn.innerText = '進行初級轉生';
+            } else {
+                prestigeBtn.disabled = true;
+                prestigeBtn.innerText = '🔒 未解鎖（需解鎖松木）';
+            }
+        }
     }
 }
 
@@ -537,6 +622,7 @@ function mergeSaveData(saved, template) {
     if (saved.currentView) merged.currentView = saved.currentView;
     if (saved.lastMap) merged.lastMap = saved.lastMap;
     if (saved.baseMaxOfflineSeconds !== undefined) merged.baseMaxOfflineSeconds = saved.baseMaxOfflineSeconds;
+    if (saved.numberFormat !== undefined) merged.numberFormat = saved.numberFormat;
 	
     if (saved.resources) {
         Object.keys(saved.resources).forEach(k => {

@@ -9,6 +9,7 @@ const defaultConfig = {
     unlockedPrestige: false,
     recycleTimer: 0,
     baseMaxOfflineSeconds: 86400,
+    numberFormat: 'abbreviation', // 新增：控制進位制表示法 ('abbreviation' or 'scientific')
 
     resources: {
         leaf: { id: 'leaf', name: '落葉', amount: 0, lifetimeAmount: 0, unlocked: true },
@@ -31,19 +32,19 @@ const defaultConfig = {
     },
 
     upgrades: {
-        leaf_amount: { id: 'leaf_amount', category: 'leaf', name: '增加清掃落葉量', desc: '每級 +1 片落葉', level: 0, maxLevel: 500, baseCost: 10, costResource: 'leaf', multiplier: 1.15 },
-        leaf_speed: { id: 'leaf_speed', category: 'leaf', name: '增加清掃速度', desc: '每級 -0.01 秒冷卻', level: 0, maxLevel: 150, baseCost: 10, costResource: 'leaf', multiplier: 1.1 },
-        leaf_count: { id: 'leaf_count', category: 'leaf', name: '增加機器人數量', desc: '每級 +1 台機器人', level: 0, maxLevel: 7, baseCost: 500, costResource: 'leaf', multiplier: 3.0 },
+        leaf_amount: { id: 'leaf_amount', category: 'leaf', name: '清掃量升級', desc: '增加清掃落葉量，每級 +1 片落葉', level: 0, maxLevel: 500, baseCost: 10, costResource: 'leaf', multiplier: 1.15 },
+        leaf_speed: { id: 'leaf_speed', category: 'leaf', name: '清掃效率升級', desc: '增加清掃速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 150, baseCost: 10, costResource: 'leaf', multiplier: 1.1 },
+        leaf_count: { id: 'leaf_count', category: 'leaf', name: '機器採購', desc: '增加機器人數量，每級 +1 台機器人', level: 0, maxLevel: 7, baseCost: 500, costResource: 'leaf', multiplier: 3.0 },
         unlock_branch_robot: {
-            id: 'unlock_branch_robot', category: 'leaf', name: '獲得撿樹枝機器人', desc: '解鎖樹枝與撿樹枝機器人', level: 0, maxLevel: 1, baseCost: 10000, costResource: 'leaf', multiplier: 1.0,
+            id: 'unlock_branch_robot', category: 'leaf', name: '撿樹枝機器人採購', desc: '解鎖樹枝與撿樹枝機器人', level: 0, maxLevel: 1, baseCost: 10000, costResource: 'leaf', multiplier: 1.0,
             onPurchase: () => { gameState.resources.branch.unlocked = true; gameState.robots.branchCollector.unlocked = true; gameState.robots.branchCollector.baseCount = 1; initUI(); }
         },
 
-        branch_amount: { id: 'branch_amount', category: 'branch', name: '增加清掃樹枝量', desc: '每級 +1 個樹枝', level: 0, maxLevel: 500, baseCost: 15, costResource: 'branch', multiplier: 1.15 },
-        branch_speed: { id: 'branch_speed', category: 'branch', name: '增加清掃速度', desc: '每級 -0.01 秒冷卻', level: 0, maxLevel: 200, baseCost: 15, costResource: 'branch', multiplier: 1.1 },
-        branch_count: { id: 'branch_count', category: 'branch', name: '增加機器人數量', desc: '每級 +1 台機器人', level: 0, maxLevel: 6, baseCost: 1000, costResource: 'branch', multiplier: 3.0 },
+        branch_amount: { id: 'branch_amount', category: 'branch', name: '清掃量升級', desc: '增加清掃樹枝量，每級 +1 個樹枝', level: 0, maxLevel: 500, baseCost: 15, costResource: 'branch', multiplier: 1.15 },
+        branch_speed: { id: 'branch_speed', category: 'branch', name: '清掃效率升級', desc: '增加清掃速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 200, baseCost: 15, costResource: 'branch', multiplier: 1.1 },
+        branch_count: { id: 'branch_count', category: 'branch', name: '機器採購', desc: '增加機器人數量，每級 +1 台機器人', level: 0, maxLevel: 6, baseCost: 1000, costResource: 'branch', multiplier: 3.0 },
         unlock_wood_robot: {
-            id: 'unlock_wood_robot', category: 'branch', name: '獲得伐木機器人', desc: '解鎖木頭與伐木機器人', level: 0, maxLevel: 1, baseCost: 5000, costResource: 'branch', multiplier: 1.0,
+            id: 'unlock_wood_robot', category: 'branch', name: '伐木機器人採購', desc: '解鎖木頭與伐木機器人', level: 0, maxLevel: 1, baseCost: 5000, costResource: 'branch', multiplier: 1.0,
             onPurchase: () => { gameState.resources.wood.unlocked = true; gameState.robots.lumberjack.unlocked = true; gameState.robots.lumberjack.baseCount = 1; initUI(); }
         },
         unlock_recycle_branch: {
@@ -51,56 +52,56 @@ const defaultConfig = {
             onPurchase: () => { gameState.unlockedRecycle = true; gameState.resources.recycle_coin.unlocked = true; initUI(); }
         },
 
-        wood_amount: { id: 'wood_amount', category: 'wood', name: '增加砍伐木頭量', desc: '每級 +1 個木頭', level: 0, maxLevel: 500, baseCost: 20, costResource: 'wood', multiplier: 1.15 },
-        wood_speed: { id: 'wood_speed', category: 'wood', name: '增加砍伐速度', desc: '每級 -0.01 秒冷卻', level: 0, maxLevel: 300, baseCost: 20, costResource: 'wood', multiplier: 1.1 },
-        wood_count: { id: 'wood_count', category: 'wood', name: '增加機器人數量', desc: '每級 +1 台機器人', level: 0, maxLevel: 5, baseCost: 2000, costResource: 'wood', multiplier: 3.0 },
+        wood_amount: { id: 'wood_amount', category: 'wood', name: '清掃量升級', desc: '增加砍伐木頭量，每級 +1 個木頭', level: 0, maxLevel: 500, baseCost: 20, costResource: 'wood', multiplier: 1.15 },
+        wood_speed: { id: 'wood_speed', category: 'wood', name: '清掃效率升級', desc: '增加砍伐速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 300, baseCost: 20, costResource: 'wood', multiplier: 1.1 },
+        wood_count: { id: 'wood_count', category: 'wood', name: '機器採購', desc: '增加機器人數量，每級 +1 台機器人', level: 0, maxLevel: 5, baseCost: 2000, costResource: 'wood', multiplier: 3.0 },
         unlock_pine_robot: {
-            id: 'unlock_pine_robot', category: 'wood', name: '獲得松葉掃地機器人', desc: '解鎖松葉資源與相關機器人', level: 0, maxLevel: 1, baseCost: 20000, costResource: 'wood', multiplier: 1.0,
+            id: 'unlock_pine_robot', category: 'wood', name: '松葉掃地機器人採購', desc: '解鎖松葉與松葉掃地機器人', level: 0, maxLevel: 1, baseCost: 20000, costResource: 'wood', multiplier: 1.0,
             onPurchase: () => { gameState.resources.pine_leaf.unlocked = true; gameState.robots.pineSweeper.unlocked = true; gameState.robots.pineSweeper.baseCount = 1; initUI(); }
         },
         unlock_map2: {
-            id: 'unlock_map2', category: 'wood', name: '開放【地圖】選項', desc: '可切換至其他地區（解鎖寒帶針葉林）', level: 0, maxLevel: 1, baseCost: 50000, costResource: 'wood', multiplier: 1.0,
+            id: 'unlock_map2', category: 'wood', name: '解鎖【地圖】', desc: '可切換至其他地區，並解鎖寒帶針葉林', level: 0, maxLevel: 1, baseCost: 50000, costResource: 'wood', multiplier: 1.0,
             onPurchase: () => { gameState.unlockedMap2 = true; initUI(); }
         },
 
-        pine_leaf_amount: { id: 'pine_leaf_amount', category: 'pine_leaf', name: '增加清掃松葉量', desc: '每級 +1 片松葉', level: 0, maxLevel: 500, baseCost: 10, costResource: 'pine_leaf', multiplier: 1.2 },
-        pine_leaf_speed: { id: 'pine_leaf_speed', category: 'pine_leaf', name: '增加清掃速度', desc: '每級 -0.01 秒冷卻', level: 0, maxLevel: 150, baseCost: 10, costResource: 'pine_leaf', multiplier: 1.15 },
-        pine_leaf_count: { id: 'pine_leaf_count', category: 'pine_leaf', name: '增加機器人數量', desc: '每級 +1 台機器人', level: 0, maxLevel: 7, baseCost: 500, costResource: 'pine_leaf', multiplier: 3.2 },
+        pine_leaf_amount: { id: 'pine_leaf_amount', category: 'pine_leaf', name: '清掃量升級', desc: '增加清掃松葉量，每級 +1 片松葉', level: 0, maxLevel: 500, baseCost: 10, costResource: 'pine_leaf', multiplier: 1.2 },
+        pine_leaf_speed: { id: 'pine_leaf_speed', category: 'pine_leaf', name: '清掃效率升級', desc: '增加清掃速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 150, baseCost: 10, costResource: 'pine_leaf', multiplier: 1.15 },
+        pine_leaf_count: { id: 'pine_leaf_count', category: 'pine_leaf', name: '機器採購', desc: '增加機器人數量，每級 +1 台機器人', level: 0, maxLevel: 7, baseCost: 500, costResource: 'pine_leaf', multiplier: 3.2 },
         unlock_pine_branch_robot: {
-            id: 'unlock_pine_branch_robot', category: 'pine_leaf', name: '獲得撿松枝機器人', desc: '解鎖松枝與撿松枝機器人', level: 0, maxLevel: 1, baseCost: 10000, costResource: 'pine_leaf', multiplier: 1.0,
+            id: 'unlock_pine_branch_robot', category: 'pine_leaf', name: '撿松枝機器人採購', desc: '解鎖松枝與撿松枝機器人', level: 0, maxLevel: 1, baseCost: 10000, costResource: 'pine_leaf', multiplier: 1.0,
             onPurchase: () => { gameState.resources.pine_branch.unlocked = true; gameState.robots.pineBranchCollector.unlocked = true; gameState.robots.pineBranchCollector.baseCount = 1; initUI(); }
         },
 
-        pine_branch_amount: { id: 'pine_branch_amount', category: 'pine_branch', name: '增加清掃松枝量', desc: '每級 +1 個松枝', level: 0, maxLevel: 500, baseCost: 15, costResource: 'pine_branch', multiplier: 1.2 },
-        pine_branch_speed: { id: 'pine_branch_speed', category: 'pine_branch', name: '增加清掃速度', desc: '每級 -0.01 秒冷卻', level: 0, maxLevel: 200, baseCost: 15, costResource: 'pine_branch', multiplier: 1.15 },
-        pine_branch_count: { id: 'pine_branch_count', category: 'pine_branch', name: '增加機器人數量', desc: '每級 +1 台機器人', level: 0, maxLevel: 6, baseCost: 1000, costResource: 'pine_branch', multiplier: 3.2 },
+        pine_branch_amount: { id: 'pine_branch_amount', category: 'pine_branch', name: '清掃量升級', desc: '增加清掃松枝量，每級 +1 個松枝', level: 0, maxLevel: 500, baseCost: 15, costResource: 'pine_branch', multiplier: 1.2 },
+        pine_branch_speed: { id: 'pine_branch_speed', category: 'pine_branch', name: '清掃效率升級', desc: '增加清掃速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 200, baseCost: 15, costResource: 'pine_branch', multiplier: 1.15 },
+        pine_branch_count: { id: 'pine_branch_count', category: 'pine_branch', name: '機器採購', desc: '增加機器人數量，每級 +1 台機器人', level: 0, maxLevel: 6, baseCost: 1000, costResource: 'pine_branch', multiplier: 3.2 },
         unlock_pine_wood_robot: {
-            id: 'unlock_pine_wood_robot', category: 'pine_branch', name: '獲得伐松木機器人', desc: '解鎖松木與伐松木機器人', level: 0, maxLevel: 1, baseCost: 5000, costResource: 'pine_branch', multiplier: 1.0,
+            id: 'unlock_pine_wood_robot', category: 'pine_branch', name: '伐松木機器人採購', desc: '解鎖松木與伐松木機器人', level: 0, maxLevel: 1, baseCost: 5000, costResource: 'pine_branch', multiplier: 1.0,
             onPurchase: () => { gameState.resources.pine_wood.unlocked = true; gameState.robots.pineLumberjack.unlocked = true; gameState.robots.pineLumberjack.baseCount = 1; initUI(); }
         },
 
-        pine_wood_amount: { id: 'pine_wood_amount', category: 'pine_wood', name: '增加砍伐松木量', desc: '每級 +1 個松木', level: 0, maxLevel: 500, baseCost: 20, costResource: 'pine_wood', multiplier: 1.2 },
-        pine_wood_speed: { id: 'pine_wood_speed', category: 'pine_wood', name: '增加砍伐速度', desc: '每級 -0.01 秒冷卻', level: 0, maxLevel: 300, baseCost: 20, costResource: 'pine_wood', multiplier: 1.15 },
-        pine_wood_count: { id: 'pine_wood_count', category: 'pine_wood', name: '增加機器人數量', desc: '每級 +1 台機器人', level: 0, maxLevel: 5, baseCost: 2000, costResource: 'pine_wood', multiplier: 3.2 },
+        pine_wood_amount: { id: 'pine_wood_amount', category: 'pine_wood', name: '清掃量升級', desc: '增加砍伐松木量，每級 +1 個松木', level: 0, maxLevel: 500, baseCost: 20, costResource: 'pine_wood', multiplier: 1.2 },
+        pine_wood_speed: { id: 'pine_wood_speed', category: 'pine_wood', name: '清掃效率升級', desc: '增加砍伐速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 300, baseCost: 20, costResource: 'pine_wood', multiplier: 1.15 },
+        pine_wood_count: { id: 'pine_wood_count', category: 'pine_wood', name: '機器採購', desc: '增加機器人數量，每級 +1 台機器人', level: 0, maxLevel: 5, baseCost: 2000, costResource: 'pine_wood', multiplier: 3.2 },
         unlock_prestige: {
-            id: 'unlock_prestige', category: 'pine_wood', name: '開啟【初級轉生】功能', desc: '解鎖初級轉生系統與專屬天賦樹', level: 0, maxLevel: 1, baseCost: 50000, costResource: 'pine_wood', multiplier: 1.0,
+            id: 'unlock_prestige', category: 'pine_wood', name: '解鎖【初級轉生】', desc: '解鎖初級轉生系統與專屬升級系統', level: 0, maxLevel: 1, baseCost: 50000, costResource: 'pine_wood', multiplier: 1.0,
             onPurchase: () => { gameState.unlockedPrestige = true; gameState.resources.prestige_coin.unlocked = true; initUI(); }
         },
 
-        recycle_amount: { id: 'recycle_amount', category: 'recycle', name: '回收量增加', desc: '每級增加 1 倍基礎回收幣量', level: 1, maxLevel: 10, baseCost: 834, costResource: 'recycle_coin', multiplier: 1.2 },
-        recycle_speed: { id: 'recycle_speed', category: 'recycle', name: '回收速度增加', desc: '每級 -0.02 秒轉換所需時間', level: 0, maxLevel: 250, baseCost: 500, costResource: 'recycle_coin', multiplier: 1.15 },
-        recycle_efficiency: { id: 'recycle_efficiency', category: 'recycle', name: '回收轉換效率增加', desc: '每級 -1% 消耗材料量', level: 0, maxLevel: 50, baseCost: 750, costResource: 'recycle_coin', multiplier: 1.175 },
-        recycle_factory: { id: 'recycle_factory', category: 'recycle', name: '回收廠房增加', desc: '每級 +1 回收次數', level: 0, maxLevel: 10, baseCost: 2000, costResource: 'recycle_coin', multiplier: 1.25 },
+        recycle_amount: { id: 'recycle_amount', category: 'recycle', name: '幣值提升', desc: '回收量增加，每級增加 1 倍基礎回收幣量', level: 1, maxLevel: 10, baseCost: 834, costResource: 'recycle_coin', multiplier: 1.2 },
+        recycle_speed: { id: 'recycle_speed', category: 'recycle', name: '回收效率升級', desc: '回收速度增加，每級 -0.02 秒轉換所需時間', level: 0, maxLevel: 250, baseCost: 500, costResource: 'recycle_coin', multiplier: 1.15 },
+        recycle_efficiency: { id: 'recycle_efficiency', category: 'recycle', name: '成本降低', desc: '回收轉換成本降低，每級 -1% 消耗材料量', level: 0, maxLevel: 50, baseCost: 750, costResource: 'recycle_coin', multiplier: 1.175 },
+        recycle_factory: { id: 'recycle_factory', category: 'recycle', name: '新建廠房', desc: '回收廠房增加，每級 +1 回收次數', level: 0, maxLevel: 10, baseCost: 2000, costResource: 'recycle_coin', multiplier: 1.25 },
 
-        pres_leaf_boost: { id: 'pres_leaf_boost', category: 'prestige', name: '提升 落葉 的獲得量', desc: '每級 *1 倍（直加於基礎獲得量）', level: 1, maxLevel: 20, baseCost: 5, costResource: 'prestige_coin', multiplier: 2.0 },
-        pres_branch_boost: { id: 'pres_branch_boost', category: 'prestige', name: '提升 樹枝 的獲得量', desc: '每級 *1 倍（直加於基礎獲得量）', level: 1, maxLevel: 20, baseCost: 10, costResource: 'prestige_coin', multiplier: 2.0 },
-        pres_wood_boost: { id: 'pres_wood_boost', category: 'prestige', name: '提升 木頭 的獲得量', desc: '每級 *1 倍（直加於基礎獲得量）', level: 1, maxLevel: 20, baseCost: 20, costResource: 'prestige_coin', multiplier: 2.0 },
-        pres_pine_leaf_boost: { id: 'pres_pine_leaf_boost', category: 'prestige', name: '提升 松葉 的獲得量', desc: '每級 *1 倍（直加於基礎獲得量）', level: 1, maxLevel: 20, baseCost: 40, costResource: 'prestige_coin', multiplier: 2.0 },
-        pres_pine_branch_boost: { id: 'pres_pine_branch_boost', category: 'prestige', name: '提升 松枝 的獲得量', desc: '每級 *1 倍（直加於基礎獲得量）', level: 1, maxLevel: 20, baseCost: 80, costResource: 'prestige_coin', multiplier: 2.0 },
-        pres_pine_wood_boost: { id: 'pres_pine_wood_boost', category: 'prestige', name: '提升 松木 的獲得量', desc: '每級 *1 倍（直加於基礎獲得量）', level: 1, maxLevel: 20, baseCost: 160, costResource: 'prestige_coin', multiplier: 2.0 },
-        pres_recycle_boost: { id: 'pres_recycle_boost', category: 'prestige', name: '提升 回收廠 素材間轉換量', desc: '每級 *1 倍（不包含回收幣）', level: 1, maxLevel: 20, baseCost: 5, costResource: 'prestige_coin', multiplier: 2.0 },
-        pres_coin_boost: { id: 'pres_coin_boost', category: 'prestige', name: '提升獲得的初級硬幣量', desc: '每級 +1% 硬幣獲得量', level: 0, maxLevel: 100, baseCost: 10, costResource: 'prestige_coin', multiplier: 1.4 },
-        pres_interest: { id: 'pres_interest', category: 'prestige', name: '被動利息', desc: '每分鐘額外獲得目前初級硬幣的 0.1%', level: 0, maxLevel: 10, baseCost: 100, costResource: 'prestige_coin', multiplier: 1.2 }
+        pres_leaf_boost: { id: 'pres_leaf_boost', category: 'prestige', name: '落葉 升級', desc: '提升 落葉 的獲得量，每級+100%', level: 1, maxLevel: 20, baseCost: 1, costResource: 'prestige_coin', multiplier: 2.0 },
+        pres_branch_boost: { id: 'pres_branch_boost', category: 'prestige', name: '樹枝 升級', desc: '提升 樹枝 的獲得量，每級+100%', level: 1, maxLevel: 20, baseCost: 2, costResource: 'prestige_coin', multiplier: 2.0 },
+        pres_wood_boost: { id: 'pres_wood_boost', category: 'prestige', name: '木頭 升級', desc: '提升 木頭 的獲得量，每級+100%', level: 1, maxLevel: 20, baseCost: 4, costResource: 'prestige_coin', multiplier: 2.0 },
+        pres_pine_leaf_boost: { id: 'pres_pine_leaf_boost', category: 'prestige', name: '松葉 升級', desc: '提升 松葉 的獲得量，每級+100%', level: 1, maxLevel: 20, baseCost: 8, costResource: 'prestige_coin', multiplier: 2.0 },
+        pres_pine_branch_boost: { id: 'pres_pine_branch_boost', category: 'prestige', name: '松枝 升級', desc: '提升 松枝 的獲得量，每級+100%', level: 1, maxLevel: 20, baseCost: 16, costResource: 'prestige_coin', multiplier: 2.0 },
+        pres_pine_wood_boost: { id: 'pres_pine_wood_boost', category: 'prestige', name: '松木 升級', desc: '提升 松木 的獲得量，每級+100%', level: 1, maxLevel: 20, baseCost: 32, costResource: 'prestige_coin', multiplier: 2.0 },
+        pres_recycle_boost: { id: 'pres_recycle_boost', category: 'prestige', name: '回收廠 轉換效率升級', desc: '提升 回收廠 素材轉換的數量，每級+100%', level: 1, maxLevel: 20, baseCost: 1, costResource: 'prestige_coin', multiplier: 2.0 },
+        pres_recycle_efficiency: { id: 'pres_recycle_efficiency', category: 'prestige', name: '回收廠 成本降低', desc: '降低回收廠材料消耗，每級 -1% 消耗材料量', level: 0, maxLevel: 30, baseCost: 10, costResource: 'prestige_coin', multiplier: 1.2 },
+		pres_coin_boost: { id: 'pres_coin_boost', category: 'prestige', name: '提升獲得的初級硬幣量', desc: '提升獲得的初級硬幣量，每級+1%', level: 0, maxLevel: 100, baseCost: 3, costResource: 'prestige_coin', multiplier: 1.8 },
     },
 
     recycles: {

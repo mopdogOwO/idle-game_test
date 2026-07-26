@@ -14,6 +14,35 @@ body { background-color: var(--bg-color); color: var(--text-color); display: fle
 header { text-align: center; margin-bottom: 20px; }
 h1 { color: #80ed99; margin-bottom: 10px; }
 
+/* 核心遊戲版面（大螢幕為側邊欄） */
+.game-layout {
+    display: flex;
+    gap: 20px;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    flex: 1;
+}
+
+.sidebar-resources {
+    width: 210px;
+    flex-shrink: 0;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    align-self: flex-start;
+    position: sticky;
+    top: 20px;
+}
+
+.game-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
 /* 頂部導覽列 */
 .nav-tabs { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
 .nav-group { display: flex; gap: 8px; align-items: center; }
@@ -26,13 +55,60 @@ h1 { color: #80ed99; margin-bottom: 10px; }
 .nav-btn.prestige-btn.active { background-color: #f72585; }
 .nav-btn:disabled { background-color: #2b2d42; color: #6c757d; cursor: not-allowed; }
 
-.resource-container { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; }
-.resource-card { background-color: var(--card-bg); padding: 12px 20px; border-radius: 10px; min-width: 130px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border-bottom: 4px solid var(--accent-color); }
-.resource-card h3 { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 5px; }
-.resource-card .amount { font-size: 1.4rem; font-weight: bold; color: #fff; }
+/* 側邊欄資源卡片設計：扁平、縮小框、寬度自適應數字 */
+.sidebar-resources .resource-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar-resources .resource-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #222229;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-color);
+    box-shadow: none;
+    min-width: 0;
+}
+
+.sidebar-resources .resource-card h3 {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-bottom: 0;
+    text-align: left;
+}
+
+.sidebar-resources .resource-card .amount {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #ffd166;
+    text-align: right;
+    word-break: break-all;
+    margin-left: 10px;
+}
+
+/* 進位與簡寫切換開關樣式 */
+.toggle-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #222229;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-bottom: 15px;
+}
+
+.toggle-container .switch {
+    flex-shrink: 0;
+}
 
 .page-view { display: none; }
-.page-view.active { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; width: 100%; }
+.page-view.active { display: flex; gap: 20px; width: 100%; }
 
 .section-box { flex: 1; background-color: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 .section-title { font-size: 1.2rem; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #3d405b; color: #f4a261; }
@@ -75,6 +151,7 @@ input:checked + .slider:before { transform: translateX(22px); }
 .prestige-box p { font-size: 0.95rem; color: #e0aaff; margin-bottom: 15px; }
 .prestige-btn-main { background-color: #f72585; color: white; border: none; padding: 12px 30px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 15px rgba(247, 37, 133, 0.4); transition: 0.2s; }
 .prestige-btn-main:hover { background-color: #4cc9f0; color: #000; transform: scale(1.03); }
+.prestige-btn-main:disabled {background-color: var(--btn-disabled); color: #8d99ae; cursor: not-allowed; box-shadow: none; transform: none; opacity: 0.6;}
 
 /* 動畫過場遮罩 */
 #prestige-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000; opacity: 0; pointer-events: none; transition: opacity 1s ease-in-out; z-index: 9999; display: flex; justify-content: center; align-items: center; color: #f72585; font-size: 2rem; font-weight: bold; }
@@ -83,3 +160,37 @@ footer { margin-top: 20px; text-align: center; display: flex; justify-content: c
 .sys-btn { background-color: #4a4e69; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
 .sys-btn.success { background-color: #2a9d8f; }
 .sys-btn.danger { background-color: #e63946; }
+
+/* 行動裝置適應（螢幕寬度 900px 以下） */
+@media (max-width: 900px) {
+    .game-layout {
+        flex-direction: column;
+    }
+    .sidebar-resources {
+        width: 100%;
+        position: static;
+    }
+    .sidebar-resources .resource-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .sidebar-resources .resource-card {
+        flex: 1;
+        min-width: 125px;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 10px;
+    }
+    .sidebar-resources .resource-card h3 {
+        text-align: center;
+    }
+    .sidebar-resources .resource-card .amount {
+        text-align: center;
+        margin-left: 0;
+    }
+    .page-view.active {
+        flex-direction: column;
+    }
+}
