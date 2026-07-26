@@ -1,0 +1,85 @@
+:root {
+    --bg-color: #1e1e24;
+    --card-bg: #2b2d42;
+    --accent-color: #4ea8de;
+    --text-color: #edf2f4;
+    --text-dim: #8d99ae;
+    --btn-bg: #3a86ff;
+    --btn-hover: #00b4d8;
+    --btn-disabled: #4a4e69;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+body { background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; min-height: 100vh; padding: 20px; }
+header { text-align: center; margin-bottom: 20px; }
+h1 { color: #80ed99; margin-bottom: 10px; }
+
+/* 頂部導覽列 */
+.nav-tabs { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+.nav-group { display: flex; gap: 8px; align-items: center; }
+.nav-divider { width: 2px; height: 25px; background-color: #3d405b; margin: 0 5px; }
+
+.nav-btn { background-color: #3d405b; color: #fff; border: none; padding: 8px 18px; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.nav-btn.active { background-color: #e07a5f; }
+.nav-btn.feature-btn.active { background-color: #2a9d8f; }
+.nav-btn.prestige-btn { background-color: #7209b7; color: #fff; }
+.nav-btn.prestige-btn.active { background-color: #f72585; }
+.nav-btn:disabled { background-color: #2b2d42; color: #6c757d; cursor: not-allowed; }
+
+.resource-container { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; }
+.resource-card { background-color: var(--card-bg); padding: 12px 20px; border-radius: 10px; min-width: 130px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border-bottom: 4px solid var(--accent-color); }
+.resource-card h3 { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 5px; }
+.resource-card .amount { font-size: 1.4rem; font-weight: bold; color: #fff; }
+
+.page-view { display: none; }
+.page-view.active { display: flex; gap: 20px; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+.section-box { flex: 1; background-color: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.section-title { font-size: 1.2rem; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 2px solid #3d405b; color: #f4a261; }
+
+.robot-card { background-color: #222229; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #57cc99; }
+.robot-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.robot-name { font-weight: bold; font-size: 1.1rem; }
+.robot-count { background-color: #38b000; color: #000; padding: 2px 8px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; }
+.robot-stats { display: flex; gap: 15px; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 10px; flex-wrap: wrap; }
+
+.progress-bar-container { width: 100%; height: 8px; background-color: #484b6a; border-radius: 4px; overflow: hidden; }
+.progress-bar { height: 100%; width: 0%; background-color: #57cc99; transition: width 0.05s linear; }
+
+.tab-container { display: flex; gap: 10px; border-bottom: 2px solid #3d405b; padding-bottom: 10px; margin-bottom: 15px; }
+.tab-btn { background-color: #222229; color: var(--text-dim); border: 1px solid #3d405b; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+.tab-btn.active { background-color: var(--btn-bg); color: #fff; border-color: var(--btn-bg); }
+
+.upgrade-list { display: flex; flex-direction: column; gap: 10px; max-height: 550px; overflow-y: auto; }
+.upgrade-item { background-color: #222229; padding: 12px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+.upgrade-info { flex: 1; }
+.upgrade-title { font-weight: bold; font-size: 1rem; margin-bottom: 4px; }
+.upgrade-desc { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 4px; }
+.upgrade-cost { font-size: 0.85rem; color: #ffd166; font-weight: bold; }
+
+.buy-btn { background-color: #06d6a0; color: #000; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 10px; min-width: 80px; }
+.buy-btn:hover:not(:disabled) { background-color: #4895ef; color: white; }
+.buy-btn:disabled { background-color: var(--btn-disabled); color: #8d99ae; cursor: not-allowed; }
+
+.recycle-item { background-color: #222229; padding: 12px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+.switch { position: relative; display: inline-block; width: 44px; height: 22px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #4a4e69; transition: .4s; border-radius: 22px; }
+.slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: #2a9d8f; }
+input:checked + .slider:before { transform: translateX(22px); }
+
+/* 轉生專屬樣式 */
+.prestige-box { text-align: center; background: linear-gradient(135deg, #3a0ca3, #7209b7); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+.prestige-box h2 { font-size: 1.5rem; margin-bottom: 10px; color: #f72585; }
+.prestige-box p { font-size: 0.95rem; color: #e0aaff; margin-bottom: 15px; }
+.prestige-btn-main { background-color: #f72585; color: white; border: none; padding: 12px 30px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 15px rgba(247, 37, 133, 0.4); transition: 0.2s; }
+.prestige-btn-main:hover { background-color: #4cc9f0; color: #000; transform: scale(1.03); }
+
+/* 動畫過場遮罩 */
+#prestige-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000; opacity: 0; pointer-events: none; transition: opacity 1s ease-in-out; z-index: 9999; display: flex; justify-content: center; align-items: center; color: #f72585; font-size: 2rem; font-weight: bold; }
+
+footer { margin-top: 20px; text-align: center; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+.sys-btn { background-color: #4a4e69; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+.sys-btn.success { background-color: #2a9d8f; }
+.sys-btn.danger { background-color: #e63946; }
