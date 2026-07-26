@@ -100,7 +100,7 @@ const defaultConfig = {
         pres_pine_wood_boost: { id: 'pres_pine_wood_boost', category: 'prestige', name: '提升 松木 的獲得量', desc: '每級 *1 倍（直加於基礎獲得量）', level: 1, maxLevel: 20, baseCost: 160, costResource: 'prestige_coin', multiplier: 2.0 },
         pres_recycle_boost: { id: 'pres_recycle_boost', category: 'prestige', name: '提升 回收廠 素材間轉換量', desc: '每級 *1 倍（不包含回收幣）', level: 1, maxLevel: 20, baseCost: 5, costResource: 'prestige_coin', multiplier: 2.0 },
         pres_coin_boost: { id: 'pres_coin_boost', category: 'prestige', name: '提升獲得的初級硬幣量', desc: '每級 +1% 硬幣獲得量', level: 0, maxLevel: 100, baseCost: 10, costResource: 'prestige_coin', multiplier: 1.4 },
-        pres_interest: { id: 'pres_interest', category: 'prestige', name: '被動利息', desc: '每分鐘額外獲得目前初級硬幣的 0.1%', level: 0, maxLevel: 1, baseCost: 100, costResource: 'prestige_coin', multiplier: 1.2 }
+        pres_interest: { id: 'pres_interest', category: 'prestige', name: '被動利息', desc: '每分鐘額外獲得目前初級硬幣的 0.1%', level: 0, maxLevel: 10, baseCost: 100, costResource: 'prestige_coin', multiplier: 1.2 }
     },
 
     recycles: {
