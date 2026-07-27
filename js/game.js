@@ -1,8 +1,8 @@
 let gameState = JSON.parse(JSON.stringify(defaultConfig));
 let activeTabMap1 = 'leaf';
 let activeTabMap2 = 'pine_leaf';
-let activeTabMap3 = 'broad_leaf';
-let activeTabMap4 = 'sakura_leaf';
+let activeTabMap3 = 'broad_leaf'; 
+let activeTabMap4 = 'sakura_leaf'; 
 
 // ==================== 0. 數字格式化與進位引擎 ====================
 
@@ -167,7 +167,6 @@ function calculatePrestigeCoinGain() {
                  + (r.pine_leaf.lifetimeAmount || 0) * 0.000002
                  + (r.pine_branch.lifetimeAmount || 0) * 0.00001
                  + (r.pine_wood.lifetimeAmount || 0) * 0.00002
-                 // 已補齊以下六行：新增闊木林與櫻花林所有素材至轉生幣獲取公式中
                  + (r.broad_leaf.lifetimeAmount || 0) * 0.000004 // 闊葉
                  + (r.broad_branch.lifetimeAmount || 0) * 0.00002 // 闊枝
                  + (r.broad_wood.lifetimeAmount || 0) * 0.00004 // 闊木
@@ -273,9 +272,11 @@ function processInterest(now) {
 }
 
 function executePrestige() {
-	if (!gameState.resources.pine_wood?.unlocked) {
+    // 修正防禦邏輯：必須在當前週期購買了「解鎖【初級轉生】」科技才可執行轉生
+    if ((gameState.upgrades.unlock_prestige?.level || 0) <= 0) {
         return;
     }
+    
     let gainedCoins = calculatePrestigeCoinGain();
     if (gainedCoins <= 0) {
         if (!confirm('你目前轉生無法獲得任何初級硬幣，確定要轉生嗎？')) return;
@@ -313,7 +314,7 @@ function executePrestige() {
                     gameState.upgrades[k].level = 1;
                 }
             } else {
-                // 非 pres_ 開頭的普通科技與地圖解鎖 (unlock_map3, unlock_map4 均會被歸零，每次需要重新買門檻)
+                // 非 pres_ 開頭的普通科技與地圖解鎖 (unlock_map3, unlock_map4, unlock_prestige 均會被歸零，每次需要重新買門檻)
                 gameState.upgrades[k].level = (k === 'recycle_amount') ? 1 : 0;
             }
         });
@@ -412,7 +413,7 @@ function initUI() {
         navTabs.style.display = 'none';
     }
 
-    // 控制頂部選單按鈕的顯隱 (地圖 3 與地圖 4 需同時滿足解鎖了 Map 2 才能顯示)
+    // 控制頂部選單按鈕的顯隱
     const navMap2Btn = document.getElementById('nav-map2');
     if (navMap2Btn) navMap2Btn.style.display = gameState.unlockedMap2 ? 'inline-block' : 'none';
     const navMap3Btn = document.getElementById('nav-map3');
@@ -686,13 +687,14 @@ function updateDynamicValues() {
 
         const prestigeBtn = document.getElementById('prestige-btn'); 
         if (prestigeBtn) {
-            const isPineUnlocked = gameState.resources.pine_wood?.unlocked || false;
-            if (isPineUnlocked) {
+            // 已修正：轉生按鈕的可用性完全綁定於「解鎖【初級轉生】」科技升級項目 (level > 0)
+            const isPrestigeTechUnlocked = (gameState.upgrades.unlock_prestige?.level || 0) > 0;
+            if (isPrestigeTechUnlocked) {
                 prestigeBtn.disabled = false;
                 prestigeBtn.innerText = '進行初級轉生';
             } else {
                 prestigeBtn.disabled = true;
-                prestigeBtn.innerText = '🔒 未解鎖（需解鎖松木）';
+                prestigeBtn.innerText = '🔒 未解鎖（需在松木頁籤中購買【解鎖【初級轉生】】科技）';
             }
         }
     }
