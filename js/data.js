@@ -75,7 +75,7 @@ const defaultConfig = {
         },
 		//木頭
         wood_amount: { id: 'wood_amount', category: 'wood', name: '清掃量升級', desc: '增加砍伐木頭量，每級 +1 個木頭', level: 0, maxLevel: 500, baseCost: 20, costResource: 'wood', multiplier: 1.15 },
-        wood_speed: { id: 'wood_speed', category: 'wood', name: '清掃效率升級', desc: '增加砍伐速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 300, baseCost: 20, costResource: 'wood', multiplier: 1.1 },
+        wood_speed: { id: 'wood_speed', category: 'wood', name: '清掃效率升級', desc: '增加砍伐速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 250, baseCost: 20, costResource: 'wood', multiplier: 1.1 },
         wood_count: { id: 'wood_count', category: 'wood', name: '機器採購', desc: '增加機器人數量，每級 +1 台機器人', level: 0, maxLevel: 5, baseCost: 2000, costResource: 'wood', multiplier: 3.0 },
         unlock_pine_robot: {
             id: 'unlock_pine_robot', category: 'wood', name: '掃松葉機器人採購', desc: '解鎖松葉與掃松葉機器人', level: 0, maxLevel: 1, baseCost: 20000, costResource: 'wood', multiplier: 1.0,
@@ -104,7 +104,7 @@ const defaultConfig = {
         },
 		//松木
         pine_wood_amount: { id: 'pine_wood_amount', category: 'pine_wood', name: '清掃量升級', desc: '增加砍伐松木量，每級 +1 個松木', level: 0, maxLevel: 500, baseCost: 20, costResource: 'pine_wood', multiplier: 1.2 },
-        pine_wood_speed: { id: 'pine_wood_speed', category: 'pine_wood', name: '清掃效率升級', desc: '增加砍伐速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 300, baseCost: 20, costResource: 'pine_wood', multiplier: 1.15 },
+        pine_wood_speed: { id: 'pine_wood_speed', category: 'pine_wood', name: '清掃效率升級', desc: '增加砍伐速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 250, baseCost: 20, costResource: 'pine_wood', multiplier: 1.15 },
         pine_wood_count: { id: 'pine_wood_count', category: 'pine_wood', name: '機器採購', desc: '增加機器人數量，每級 +1 台機器人', level: 0, maxLevel: 5, baseCost: 2000, costResource: 'pine_wood', multiplier: 3.2 },
         unlock_prestige: {
             id: 'unlock_prestige', category: 'pine_wood', name: '解鎖【初級轉生】', desc: '解鎖初級轉生系統與專屬升級系統', level: 0, maxLevel: 1, baseCost: 50000, costResource: 'pine_wood', multiplier: 1.0,
@@ -117,7 +117,7 @@ const defaultConfig = {
 		
 		//闊葉
 		broad_leaf_amount: { id: 'broad_leaf_amount', category: 'broad_leaf', name: '清掃量升級', desc: '增加清掃闊葉量，每級 +1 片闊葉', level: 0, maxLevel: 500, baseCost: 10, costResource: 'broad_leaf', multiplier: 1.25 },
-        broad_leaf_speed: { id: 'broad_leaf_speed', category: 'broad_leaf', name: '清掃效率升級', desc: '增加清掃速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 300, baseCost: 10, costResource: 'broad_leaf', multiplier: 1.18 },
+        broad_leaf_speed: { id: 'broad_leaf_speed', category: 'broad_leaf', name: '清掃效率升級', desc: '增加清掃速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 150, baseCost: 10, costResource: 'broad_leaf', multiplier: 1.18 },
         broad_leaf_count: { id: 'broad_leaf_count', category: 'broad_leaf', name: '機器採購', desc: '增加機器人數量，每級 +1 台機器人', level: 0, maxLevel: 7, baseCost: 2000, costResource: 'broad_leaf', multiplier: 3.3 },
 		unlock_broad_branch_robot: {
             id: 'unlock_broad_branch_robot', category: 'broad_leaf', name: '撿闊枝機器人採購', desc: '解鎖闊枝與撿闊枝機器人', level: 0, maxLevel: 1, baseCost: 20000, costResource: 'broad_leaf', multiplier: 1.0,
@@ -125,7 +125,7 @@ const defaultConfig = {
         },
 		//闊枝
         broad_branch_amount: { id: 'broad_branch_amount', category: 'broad_branch', name: '清掃量升級', desc: '增加清掃闊枝量，每級 +1 個闊枝', level: 0, maxLevel: 500, baseCost: 15, costResource: 'broad_branch', multiplier: 1.25 },
-        broad_branch_speed: { id: 'broad_branch_speed', category: 'broad_branch', name: '清掃效率升級', desc: '增加清掃速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 300, baseCost: 15, costResource: 'broad_branch', multiplier: 1.18 },
+        broad_branch_speed: { id: 'broad_branch_speed', category: 'broad_branch', name: '清掃效率升級', desc: '增加清掃速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 200, baseCost: 15, costResource: 'broad_branch', multiplier: 1.18 },
         broad_branch_count: { id: 'broad_branch_count', category: 'broad_branch', name: '機器採購', desc: '增加機器人數量，每級 +1 台機器人', level: 0, maxLevel: 6, baseCost: 2000, costResource: 'broad_branch', multiplier: 3.3 },
 		unlock_broad_wood_robot: {
             id: 'unlock_broad_wood_robot', category: 'broad_branch', name: '伐闊木機器人採購', desc: '解鎖闊木與伐闊木機器人', level: 0, maxLevel: 1, baseCost: 30000, costResource: 'broad_branch', multiplier: 1.0,
@@ -133,7 +133,7 @@ const defaultConfig = {
         },
 		//闊木
         broad_wood_amount: { id: 'broad_wood_amount', category: 'broad_wood', name: '清掃量升級', desc: '增加砍伐闊木量，每級 +1 個闊木', level: 0, maxLevel: 500, baseCost: 20, costResource: 'broad_wood', multiplier: 1.25 },
-        broad_wood_speed: { id: 'broad_wood_speed', category: 'broad_wood', name: '清掃效率升級', desc: '增加砍伐速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 300, baseCost: 20, costResource: 'broad_wood', multiplier: 1.18 },
+        broad_wood_speed: { id: 'broad_wood_speed', category: 'broad_wood', name: '清掃效率升級', desc: '增加砍伐速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 250, baseCost: 20, costResource: 'broad_wood', multiplier: 1.18 },
         broad_wood_count: { id: 'broad_wood_count', category: 'broad_wood', name: '機器採購', desc: '增加機器人數量，每級 +1 台機器人', level: 0, maxLevel: 5, baseCost: 2000, costResource: 'broad_wood', multiplier: 3.3 },
 		unlock_sakura_robot: {
             id: 'unlock_sakura_robot', category: 'broad_wood', name: '掃櫻花機器人採購', desc: '解鎖櫻花與掃櫻花機器人', level: 0, maxLevel: 1, baseCost: 40000, costResource: 'broad_wood', multiplier: 1.0,
@@ -142,7 +142,7 @@ const defaultConfig = {
 
 		//櫻花
 		sakura_leaf_amount: { id: 'sakura_leaf_amount', category: 'sakura_leaf', name: '清掃量升級', desc: '增加清掃櫻花量，每級 +1 片櫻花', level: 0, maxLevel: 500, baseCost: 10, costResource: 'sakura_leaf', multiplier: 1.25 },
-        sakura_leaf_speed: { id: 'sakura_leaf_speed', category: 'sakura_leaf', name: '清掃效率升級', desc: '增加清掃速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 300, baseCost: 10, costResource: 'sakura_leaf', multiplier: 1.18 },
+        sakura_leaf_speed: { id: 'sakura_leaf_speed', category: 'sakura_leaf', name: '清掃效率升級', desc: '增加清掃速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 150, baseCost: 10, costResource: 'sakura_leaf', multiplier: 1.18 },
         sakura_leaf_count: { id: 'sakura_leaf_count', category: 'sakura_leaf', name: '機器採購', desc: '增加機器人數量，每級 +1 台機器人', level: 0, maxLevel: 7, baseCost: 2000, costResource: 'sakura_leaf', multiplier: 3.3 },
 		unlock_sakura_branch_robot: {
             id: 'unlock_sakura_branch_robot', category: 'sakura_leaf', name: '撿櫻枝機器人採購', desc: '解鎖櫻枝與撿櫻枝機器人', level: 0, maxLevel: 1, baseCost: 30000, costResource: 'sakura_leaf', multiplier: 1.0,
@@ -150,7 +150,7 @@ const defaultConfig = {
         },
 		//櫻枝
         sakura_branch_amount: { id: 'sakura_branch_amount', category: 'sakura_branch', name: '清掃量升級', desc: '增加清掃櫻枝量，每級 +1 個櫻枝', level: 0, maxLevel: 500, baseCost: 15, costResource: 'sakura_branch', multiplier: 1.25 },
-        sakura_branch_speed: { id: 'sakura_branch_speed', category: 'sakura_branch', name: '清掃效率升級', desc: '增加清掃速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 300, baseCost: 15, costResource: 'sakura_branch', multiplier: 1.18 },
+        sakura_branch_speed: { id: 'sakura_branch_speed', category: 'sakura_branch', name: '清掃效率升級', desc: '增加清掃速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 200, baseCost: 15, costResource: 'sakura_branch', multiplier: 1.18 },
         sakura_branch_count: { id: 'sakura_branch_count', category: 'sakura_branch', name: '機器採購', desc: '增加機器人數量，每級 +1 台機器人', level: 0, maxLevel: 6, baseCost: 2000, costResource: 'sakura_branch', multiplier: 3.3 },
 		unlock_sakura_wood_robot: {
             id: 'unlock_sakura_wood_robot', category: 'sakura_branch', name: '伐櫻木機器人採購', desc: '解鎖櫻木與伐櫻木機器人', level: 0, maxLevel: 1, baseCost: 45000, costResource: 'sakura_branch', multiplier: 1.0,
@@ -158,7 +158,7 @@ const defaultConfig = {
         },
 		//櫻木
         sakura_wood_amount: { id: 'sakura_wood_amount', category: 'sakura_wood', name: '清掃量升級', desc: '增加砍伐櫻木量，每級 +1 個櫻木', level: 0, maxLevel: 500, baseCost: 20, costResource: 'sakura_wood', multiplier: 1.25 },
-        sakura_wood_speed: { id: 'sakura_wood_speed', category: 'sakura_wood', name: '清掃效率升級', desc: '增加砍伐速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 300, baseCost: 20, costResource: 'sakura_wood', multiplier: 1.18 },
+        sakura_wood_speed: { id: 'sakura_wood_speed', category: 'sakura_wood', name: '清掃效率升級', desc: '增加砍伐速度，每級 -0.01 秒冷卻', level: 0, maxLevel: 250, baseCost: 20, costResource: 'sakura_wood', multiplier: 1.18 },
         sakura_wood_count: { id: 'sakura_wood_count', category: 'sakura_wood', name: '機器採購', desc: '增加機器人數量，每級 +1 台機器人', level: 0, maxLevel: 5, baseCost: 2000, costResource: 'sakura_wood', multiplier: 3.3 },
 
 		
