@@ -1,8 +1,8 @@
 let gameState = JSON.parse(JSON.stringify(defaultConfig));
 let activeTabMap1 = 'leaf';
 let activeTabMap2 = 'pine_leaf';
-let activeTabMap3 = 'broad_leaf'; // 新增
-let activeTabMap4 = 'sakura_leaf'; // 新增
+let activeTabMap3 = 'broad_leaf';
+let activeTabMap4 = 'sakura_leaf';
 
 // ==================== 0. 數字格式化與進位引擎 ====================
 
@@ -167,6 +167,7 @@ function calculatePrestigeCoinGain() {
                  + (r.pine_leaf.lifetimeAmount || 0) * 0.000002
                  + (r.pine_branch.lifetimeAmount || 0) * 0.00001
                  + (r.pine_wood.lifetimeAmount || 0) * 0.00002
+                 // 已補齊以下六行：新增闊木林與櫻花林所有素材至轉生幣獲取公式中
                  + (r.broad_leaf.lifetimeAmount || 0) * 0.000004 // 闊葉
                  + (r.broad_branch.lifetimeAmount || 0) * 0.00002 // 闊枝
                  + (r.broad_wood.lifetimeAmount || 0) * 0.00004 // 闊木
@@ -199,8 +200,8 @@ function processTick(deltaTime) {
 
         let isMapUnlocked = (bot.map === 'map1') 
             || (bot.map === 'map2' && gameState.unlockedMap2)
-            || (bot.map === 'map3' && gameState.unlockedMap3)
-            || (bot.map === 'map4' && gameState.unlockedMap4);
+            || (bot.map === 'map3' && gameState.unlockedMap2 && gameState.unlockedMap3)
+            || (bot.map === 'map4' && gameState.unlockedMap2 && gameState.unlockedMap4);
         if (!isMapUnlocked) return;
 
         let totalCount = getRobotTotalCount(bot.id);
@@ -365,8 +366,8 @@ function togglePrestigeView() {
 
 function switchView(viewId) {
     if (viewId === 'map2' && !gameState.unlockedMap2) return;
-    if (viewId === 'map3' && !gameState.unlockedMap3) return;
-    if (viewId === 'map4' && !gameState.unlockedMap4) return;
+    if (viewId === 'map3' && (!gameState.unlockedMap2 || !gameState.unlockedMap3)) return;
+    if (viewId === 'map4' && (!gameState.unlockedMap2 || !gameState.unlockedMap4)) return;
     if (viewId === 'recycle' && !gameState.unlockedRecycle) return;
     if (viewId === 'prestige' && !gameState.unlockedPrestige) return;
 
@@ -389,7 +390,7 @@ function switchView(viewId) {
 }
 
 function initUI() {
-    const hasMapSystem = gameState.unlockedMap2 || gameState.unlockedMap3 || gameState.unlockedMap4;
+    const hasMapSystem = gameState.unlockedMap2;
     const hasRecycleSystem = gameState.unlockedRecycle;
     const hasPrestigeSystem = gameState.unlockedPrestige;
 
@@ -411,13 +412,13 @@ function initUI() {
         navTabs.style.display = 'none';
     }
 
-    // 控制頂部選單按鈕的顯隱
+    // 控制頂部選單按鈕的顯隱 (地圖 3 與地圖 4 需同時滿足解鎖了 Map 2 才能顯示)
     const navMap2Btn = document.getElementById('nav-map2');
     if (navMap2Btn) navMap2Btn.style.display = gameState.unlockedMap2 ? 'inline-block' : 'none';
     const navMap3Btn = document.getElementById('nav-map3');
-    if (navMap3Btn) navMap3Btn.style.display = gameState.unlockedMap3 ? 'inline-block' : 'none';
+    if (navMap3Btn) navMap3Btn.style.display = (gameState.unlockedMap2 && gameState.unlockedMap3) ? 'inline-block' : 'none';
     const navMap4Btn = document.getElementById('nav-map4');
-    if (navMap4Btn) navMap4Btn.style.display = gameState.unlockedMap4 ? 'inline-block' : 'none';
+    if (navMap4Btn) navMap4Btn.style.display = (gameState.unlockedMap2 && gameState.unlockedMap4) ? 'inline-block' : 'none';
 
     // 初始化格式切換器開關狀態
     const toggleEl = document.getElementById('number-format-toggle');
@@ -826,7 +827,7 @@ function restoreUnlocksFromUpgrades() {
         gameState.robots.sakuraLumberjack.unlocked = true;
         if (gameState.robots.sakuraLumberjack.baseCount === 0) gameState.robots.sakuraLumberjack.baseCount = 1;
     }
-    // 地圖天賦解鎖還原 (新增)
+    // 地圖天賦解鎖還原
     if (gameState.upgrades.unlock_map3?.level > 0) {
         gameState.unlockedMap3 = true;
     }
