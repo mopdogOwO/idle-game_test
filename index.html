@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>純掛機：樹林大革命OwO v1.0.3 (初級轉生版)</title>
-    <link rel="stylesheet" href="css/style.css?v=1.0.3">
+    <title>純掛機：樹林大革命 v1.0.4 (初級轉生版)</title>
+    <link rel="stylesheet" href="css/style.css?v=1.0.4">
 </head>
 <body>
 
     <header>
-        <h1>純掛機：樹林大革命OwO</h1>
+        <h1>純掛機：樹林大革命</h1>
     </header>
 
     <!-- 轉生動畫 Overlay -->
@@ -38,7 +38,6 @@
                 <div class="nav-group" id="nav-group-maps" style="display: none;">
                     <button class="nav-btn active" id="nav-map1" onclick="switchView('map1')">🌲 平原樹林</button>
                     <button class="nav-btn" id="nav-map2" onclick="switchView('map2')">❄️ 寒帶針葉林</button>
-                    <!-- 已補齊以下兩行：地圖 3 與地圖 4 的切換按鈕 -->
                     <button class="nav-btn" id="nav-map3" onclick="switchView('map3')" style="display: none;">🌳 闊木林</button>
                     <button class="nav-btn" id="nav-map4" onclick="switchView('map4')" style="display: none;">🌸 櫻花林</button>
                 </div>
@@ -56,7 +55,7 @@
                 </div>
             </div>
 
-            <!-- 第一區：平原樹林 -->
+            <!-- 第一區 -->
             <div class="page-view active" id="page-map1">
                 <div class="section-box">
                     <div class="section-title">⚙️ 機器人運作狀態 (平原)</div>
@@ -69,7 +68,7 @@
                 </div>
             </div>
 
-            <!-- 第二區：寒帶針葉林 -->
+            <!-- 第二區 -->
             <div class="page-view" id="page-map2">
                 <div class="section-box">
                     <div class="section-title">⚙️ 機器人運作狀態 (寒帶)</div>
@@ -82,7 +81,7 @@
                 </div>
             </div>
 
-            <!-- 第三區：闊木林 (已補齊) -->
+            <!-- 第三區 -->
             <div class="page-view" id="page-map3">
                 <div class="section-box">
                     <div class="section-title">⚙️ 機器人運作狀態 (闊木)</div>
@@ -95,7 +94,7 @@
                 </div>
             </div>
 
-            <!-- 第四區：櫻花林 (已補齊) -->
+            <!-- 第四區 -->
             <div class="page-view" id="page-map4">
                 <div class="section-box">
                     <div class="section-title">⚙️ 機器人運作狀態 (櫻花)</div>
@@ -108,7 +107,6 @@
                 </div>
             </div>
 
-            <!-- 回收廠 -->
             <div class="page-view" id="page-recycle">
                 <div class="section-box">
                     <div class="section-title">♻️ 回收轉換開關 (週期: <span id="recycle-timer-desc">10.0</span> 秒)</div>
@@ -128,7 +126,8 @@
                 <div class="section-box">
                     <div class="prestige-box">
                         <h2>🔮 進行初級轉生</h2>
-                        <p>將當前平原樹林、寒帶針葉林與回收廠的進度重置，換取強大的初級轉生硬幣！</p>
+                        <!-- 已修正下方這段說明文字，補上闊木林與櫻花林 -->
+                        <p>將當前平原樹林、寒帶針葉林、闊木林、櫻花林與回收廠的進度重置，換取強大的初級轉生硬幣！</p>
                         <p style="font-size: 1.1rem; color: #4cc9f0; margin-bottom: 20px;">
                             轉生後可獲得：<b id="prestige-gain-preview" style="font-size: 1.5rem; color: #ffd166;">0</b> 個初級轉生硬幣
                         </p>
@@ -149,7 +148,7 @@
     </footer>
 
     <!-- 載入腳本：先載入資料設定檔，再載入邏輯控制檔 -->
-    <script src="js/data.js?v=1.0.3"></script>
-    <script src="js/game.js?v=1.0.3"></script>
+    <script src="js/data.js?v=1.0.4"></script>
+    <script src="js/game.js?v=1.0.4"></script>
 </body>
 </html>
