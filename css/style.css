@@ -90,6 +90,31 @@ h1 { color: #80ed99; margin-bottom: 10px; }
     margin-left: 10px;
 }
 
+/* 新增：圖標專屬排版控制 */
+.resource-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.res-icon {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.inline-res-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    vertical-align: middle;
+    margin-right: 3px;
+    margin-left: 3px;
+    flex-shrink: 0;
+}
+
 /* 進位與簡寫切換開關樣式 */
 .toggle-container {
     display: flex;
@@ -123,7 +148,7 @@ h1 { color: #80ed99; margin-bottom: 10px; }
 .progress-bar { height: 100%; width: 0%; background-color: #57cc99; transition: width 0.05s linear; }
 
 .tab-container { display: flex; gap: 10px; border-bottom: 2px solid #3d405b; padding-bottom: 10px; margin-bottom: 15px; }
-.tab-btn { background-color: #222229; color: var(--text-dim); border: 1px solid #3d405b; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+.tab-btn { background-color: #222229; color: var(--text-dim); border: 1px solid #3d405b; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 4px; }
 .tab-btn.active { background-color: var(--btn-bg); color: #fff; border-color: var(--btn-bg); }
 
 .upgrade-list { display: flex; flex-direction: column; gap: 10px; max-height: 550px; overflow-y: auto; }
@@ -131,7 +156,7 @@ h1 { color: #80ed99; margin-bottom: 10px; }
 .upgrade-info { flex: 1; }
 .upgrade-title { font-weight: bold; font-size: 1rem; margin-bottom: 4px; }
 .upgrade-desc { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 4px; }
-.upgrade-cost { font-size: 0.85rem; color: #ffd166; font-weight: bold; }
+.upgrade-cost { font-size: 0.85rem; color: #ffd166; font-weight: bold; display: flex; align-items: center; }
 
 .buy-btn { background-color: #06d6a0; color: #000; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 10px; min-width: 80px; }
 .buy-btn:hover:not(:disabled) { background-color: #4895ef; color: white; }

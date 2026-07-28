@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>純掛機：樹林大革命 v1.0.5a (初級轉生版)</title>
-    <link rel="stylesheet" href="css/style.css?v=1.0.5a">
+    <title>純掛機：樹林大革命 v1.0.6</title>
+    <link rel="stylesheet" href="css/style.css?v=1.0.6">
 </head>
 <body>
 
@@ -108,12 +108,19 @@
             </div>
 
             <div class="page-view" id="page-recycle">
-                <div class="section-box">
-                    <div class="section-title">♻️ 回收轉換開關 (週期: <span id="recycle-timer-desc">10.0</span> 秒)</div>
-                    <div class="progress-bar-container" style="margin-bottom: 15px;">
-                        <div class="progress-bar" id="recycle-bar"></div>
-                    </div>
-                    <div id="recycle-options-list"></div>
+				<div class="section-box">
+					<div class="section-title">♻️ 回收轉換開關 (週期: <span id="recycle-timer-desc">10.0</span> 秒)</div>
+        
+					<!-- 新增：回收廠子分頁按鈕 -->
+					<div class="tab-container" id="tab-container-recycle" style="margin-bottom: 15px;">
+						<button class="tab-btn active" onclick="switchRecycleTab('material', this)">📦 材料互換</button>
+						<button class="tab-btn" onclick="switchRecycleTab('coin', this)">💰 轉換回收幣</button>
+					</div>
+
+					<div class="progress-bar-container" style="margin-bottom: 15px;">
+						<div class="progress-bar" id="recycle-bar"></div>
+					</div>
+					<div id="recycle-options-list"></div>
                 </div>
                 <div class="section-box">
                     <div class="section-title">🛠️ 回收廠科技升級</div>
@@ -148,7 +155,7 @@
     </footer>
 
     <!-- 載入腳本：先載入資料設定檔，再載入邏輯控制檔 -->
-    <script src="js/data.js?v=1.0.5a"></script>
-    <script src="js/game.js?v=1.0.5a"></script>
+    <script src="js/data.js?v=1.0.6"></script>
+    <script src="js/game.js?v=1.0.6"></script>
 </body>
 </html>
