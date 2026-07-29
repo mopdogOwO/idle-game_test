@@ -5,6 +5,27 @@ let activeTabMap3 = 'broad_leaf';
 let activeTabMap4 = 'sakura_leaf'; 
 let activeRecycleTab = 'material'; 
 
+let buyMultiplier = 1; // 目前的購買倍率 (1, 10, 100, 或 -1 代表 Max)
+
+// ==================== 快捷鍵監聽器 ====================
+
+window.addEventListener('keydown', (e) => {
+    if (e.repeat) return;
+    const key = e.key.toLowerCase();
+    if (key === 'z') buyMultiplier = 10;
+    if (key === 'x') buyMultiplier = 100;
+    if (key === 'c') buyMultiplier = -1; // -1 代表 Max
+    updateDynamicValues(); // 按下時立即更新 UI 文字與狀態
+});
+
+window.addEventListener('keyup', (e) => {
+    const key = e.key.toLowerCase();
+    if (['z', 'x', 'c'].includes(key)) {
+        buyMultiplier = 1;
+        updateDynamicValues();
+    }
+});
+
 // ==================== 0. 數字格式化 ====================
 
 function formatNumber(num, keepDecimalsForSmall = false) {
@@ -48,6 +69,31 @@ function toggleNumberFormat(isChecked) {
 }
 
 // ==================== 1. 核心邏輯 ====================
+
+// 等比級數公式：計算購買 N 級的總代價
+function getTotalCost(upg, amount) {
+    const L = upg.level;
+    const B = upg.baseCost;
+    const r = upg.multiplier;
+    if (r === 1) return B * amount;
+    // 公式: B * r^L * (r^n - 1) / (r - 1)
+    return Math.floor(B * Math.pow(r, L) * (Math.pow(r, amount) - 1) / (r - 1));
+}
+
+// 反推公式：現有資源最多能買幾級
+function getMaxAffordable(upg, resAmount) {
+    const L = upg.level;
+    const B = upg.baseCost;
+    const r = upg.multiplier;
+    const R = resAmount;
+    if (R < getUpgradeCost(upg)) return 0;
+    // 公式: n = log_r( (R*(r-1)/(B*r^L)) + 1 )
+    let maxN = Math.floor(Math.log((R * (r - 1) / (B * Math.pow(r, L))) + 1) / Math.log(r));
+    if (upg.maxLevel !== null && upg.maxLevel !== Infinity) {
+        maxN = Math.min(maxN, upg.maxLevel - L);
+    }
+    return Math.max(0, maxN);
+}
 
 function addResource(resId, amount) {
     if (!gameState.resources[resId] || amount <= 0) return;
@@ -122,24 +168,24 @@ function getRobotTotalCount(robotId) {
 function getRecycleInterval() {
     let base = 10.0;
     let speedLv = gameState.upgrades.recycle_speed?.level || 0;
-    return Math.max(0.5, base - (speedLv * 0.02));
+    return Math.max(0.5, base - (speedLv * 0.1));
 }
 
 function calculatePrestigeCoinGain() {
     let r = gameState.resources;
-    let rawCoins = (r.leaf.lifetimeAmount || 0) * 0.000001
-                 + (r.branch.lifetimeAmount || 0) * 0.000005
+    let rawCoins = (r.leaf.lifetimeAmount || 0) * 0.000002
+                 + (r.branch.lifetimeAmount || 0) * 0.000006
                  + (r.wood.lifetimeAmount || 0) * 0.00001
-                 + (r.pine_leaf.lifetimeAmount || 0) * 0.000002
-                 + (r.pine_branch.lifetimeAmount || 0) * 0.00001
+                 + (r.pine_leaf.lifetimeAmount || 0) * 0.000004
+                 + (r.pine_branch.lifetimeAmount || 0) * 0.000012
                  + (r.pine_wood.lifetimeAmount || 0) * 0.00002
-                 + (r.broad_leaf.lifetimeAmount || 0) * 0.000004
-                 + (r.broad_branch.lifetimeAmount || 0) * 0.00002
+                 + (r.broad_leaf.lifetimeAmount || 0) * 0.000008
+                 + (r.broad_branch.lifetimeAmount || 0) * 0.000024
                  + (r.broad_wood.lifetimeAmount || 0) * 0.00004
-                 + (r.sakura_leaf.lifetimeAmount || 0) * 0.000008
-                 + (r.sakura_branch.lifetimeAmount || 0) * 0.00004
+                 + (r.sakura_leaf.lifetimeAmount || 0) * 0.000016
+                 + (r.sakura_branch.lifetimeAmount || 0) * 0.000048
                  + (r.sakura_wood.lifetimeAmount || 0) * 0.00008
-                 + (r.recycle_coin.lifetimeAmount || 0) * 0.0015;
+                 + (r.recycle_coin.lifetimeAmount || 0) * 0.002;
 
     let bonusMultiplier = 1 + ((gameState.upgrades.pres_coin_boost?.level || 0) * 0.01);
     return Math.round(rawCoins * bonusMultiplier);
@@ -160,7 +206,6 @@ function gameLoop() {
 }
 
 function processTick(deltaTime) {
-    // 機器人產出
     Object.values(gameState.robots).forEach(bot => {
         if (!bot.unlocked) return;
         let isMapUnlocked = (bot.map === 'map1') 
@@ -182,7 +227,6 @@ function processTick(deltaTime) {
         }
     });
 
-    // 回收廠邏輯 (已優化效能，防止大循環卡死)
     if (gameState.unlockedRecycle) {
         let recInterval = getRecycleInterval();
         gameState.recycleTimer = (gameState.recycleTimer || 0) + deltaTime;
@@ -196,9 +240,7 @@ function processTick(deltaTime) {
 
             let effLv = (gameState.upgrades.recycle_efficiency?.level || 0) + (gameState.upgrades.pres_recycle_efficiency?.level || 0);
             let discountMultiplier = Math.max(0, 1 - (effLv * 0.01));
-            let coinMultiplier = gameState.upgrades.recycle_amount?.level || 1;
-            let presRecycleBoost = gameState.upgrades.pres_recycle_boost?.level || 1;
-
+            
             Object.values(gameState.recycles).forEach(rec => {
                 if (!rec.enabled) return;
                 if (!gameState.resources[rec.gainRes]?.unlocked) return;
@@ -209,7 +251,19 @@ function processTick(deltaTime) {
 
                 if (actualExecutions > 0) {
                     gameState.resources[rec.costRes].amount -= costPerCycle * actualExecutions;
-                    let gainPerCycle = rec.isCoin ? (rec.gainAmt * coinMultiplier) : (rec.gainAmt * presRecycleBoost);
+                    
+                    let gainPerCycle = 0;
+                    if (rec.isCoin) {
+                        let baseLv = gameState.upgrades.recycle_amount?.level || 1;
+                        let boostLv = gameState.upgrades.recycle_boost?.level || 1;
+                        let presBoostLv = gameState.upgrades.pres_recycle_boost?.level || 1;
+                        gainPerCycle = (rec.gainAmt + baseLv - 1) * boostLv * presBoostLv;
+                    } else {
+                        let baseLv = gameState.upgrades.recycle_material_amount?.level || 1;
+                        let boostLv = gameState.upgrades.recycle_material_boost?.level || 1;
+                        let presBoostLv = gameState.upgrades.pres_recycle_material_boost?.level || 1;
+                        gainPerCycle = (rec.gainAmt + baseLv - 1) * boostLv * presBoostLv;
+                    }
                     addResource(rec.gainRes, gainPerCycle * actualExecutions);
                 }
             });
@@ -432,27 +486,42 @@ function toggleRecycle(id, enabled) {
 
 function buyUpgrade(upgradeId) {
     let upg = gameState.upgrades[upgradeId];
-    if (!upg || upg.level >= upg.maxLevel) return;
-    let cost = getUpgradeCost(upg);
+    if (!upg) return;
+
     let costRes = gameState.resources[upg.costResource];
-    if (costRes && costRes.amount >= cost) {
-        costRes.amount -= cost;
-        upg.level += 1;
+    let isMax = (upg.maxLevel !== null && upg.maxLevel !== Infinity) ? upg.level >= upg.maxLevel : false;
+    if (isMax) return;
+
+    // 確定購買數量
+    let amountToBuy = buyMultiplier;
+    if (buyMultiplier === -1) {
+        amountToBuy = getMaxAffordable(upg, costRes.amount);
+    } else {
+        if (upg.maxLevel !== Infinity) {
+            amountToBuy = Math.min(buyMultiplier, upg.maxLevel - upg.level);
+        }
+    }
+
+    if (amountToBuy <= 0) return;
+
+    let totalCost = getTotalCost(upg, amountToBuy);
+
+    if (costRes.amount >= totalCost) {
+        costRes.amount -= totalCost;
+        upg.level += amountToBuy;
         if (upg.onPurchase) upg.onPurchase();
         renderUpgradeList();
-        updateDynamicValues(); // 立即更新一次按鈕狀態
+        updateDynamicValues();
     }
 }
 
 function updateDynamicValues() {
-    // 資源更新
     Object.values(gameState.resources).forEach(res => {
         if (!res.unlocked) return;
         const el = document.getElementById(`res-val-${res.id}`);
         if (el) el.innerText = formatNumber(res.amount);
     });
 
-    // 機器人 UI 更新
     Object.values(gameState.robots).forEach(bot => {
         if (!bot.unlocked) return;
         let totalCount = getRobotTotalCount(bot.id);
@@ -468,7 +537,6 @@ function updateDynamicValues() {
         }
     });
 
-    // 回收廠 UI 更新
     if (gameState.unlockedRecycle) {
         let recInterval = getRecycleInterval();
         const timerEl = document.getElementById('recycle-timer-desc');
@@ -478,22 +546,33 @@ function updateDynamicValues() {
 
         let effLv = (gameState.upgrades.recycle_efficiency?.level || 0) + (gameState.upgrades.pres_recycle_efficiency?.level || 0);
         let discountMultiplier = Math.max(0, 1 - (effLv * 0.01));
-        let coinMultiplier = gameState.upgrades.recycle_amount?.level || 1;
-        let presRecycleBoost = gameState.upgrades.pres_recycle_boost?.level || 1;
         let factoryTimes = 1 + (gameState.upgrades.recycle_factory?.level || 0);
 
         Object.values(gameState.recycles).forEach(rec => {
             const titleEl = document.getElementById(`rec-title-${rec.id}`);
             if (!titleEl) return;
             let actualCost = Math.max(1, Math.round(rec.costAmt * discountMultiplier)) * factoryTimes;
-            let actualGain = (rec.isCoin ? (rec.gainAmt * coinMultiplier) : (rec.gainAmt * presRecycleBoost)) * factoryTimes;
+            
+            let actualGain = 0;
+            if (rec.isCoin) {
+                let baseLv = gameState.upgrades.recycle_amount?.level || 1;
+                let boostLv = gameState.upgrades.recycle_boost?.level || 1;
+                let presBoostLv = gameState.upgrades.pres_recycle_boost?.level || 1;
+                actualGain = (rec.gainAmt + baseLv - 1) * boostLv * presBoostLv * factoryTimes;
+            } else {
+                let baseLv = gameState.upgrades.recycle_material_amount?.level || 1;
+                let boostLv = gameState.upgrades.recycle_material_boost?.level || 1;
+                let presBoostLv = gameState.upgrades.pres_recycle_material_boost?.level || 1;
+                actualGain = (rec.gainAmt + baseLv - 1) * boostLv * presBoostLv * factoryTimes;
+            }
+
             let costRes = gameState.resources[rec.costRes];
             titleEl.innerText = `${costRes.name} ➔ ${gameState.resources[rec.gainRes].name}`;
             document.getElementById(`rec-desc-${rec.id}`).innerHTML = `消耗: <b>${formatNumber(actualCost)}</b> <img src="${costRes.icon}" class="inline-res-icon"> | 獲得: <b>${formatNumber(actualGain)}</b> <img src="${gameState.resources[rec.gainRes].icon}" class="inline-res-icon">`;
         });
     }
 
-    // 🔮 關鍵修正：補回升級按鈕狀態檢查 🔮
+    // 🔮 升級按鈕狀態與文字更新 (快捷鍵連動) 🔮
     let activeCategory = 'leaf';
     if (gameState.currentView === 'map1') activeCategory = activeTabMap1;
     else if (gameState.currentView === 'map2') activeCategory = activeTabMap2;
@@ -505,10 +584,22 @@ function updateDynamicValues() {
     Object.values(gameState.upgrades).filter(u => u.category === activeCategory).forEach(upg => {
         const btn = document.getElementById(`buy-btn-${upg.id}`);
         if (btn) {
+            let costRes = gameState.resources[upg.costResource];
             let isMax = (upg.maxLevel !== null && upg.maxLevel !== Infinity) ? upg.level >= upg.maxLevel : false;
-            let cost = getUpgradeCost(upg);
-            let canAfford = gameState.resources[upg.costResource].amount >= cost;
-            btn.disabled = isMax || !canAfford;
+
+            if (isMax) {
+                btn.innerText = "滿級";
+                btn.disabled = true;
+            } else {
+                let amount = buyMultiplier;
+                if (buyMultiplier === -1) amount = getMaxAffordable(upg, costRes.amount);
+                if (amount <= 0) amount = 1; 
+                if (upg.maxLevel !== Infinity) amount = Math.min(amount, upg.maxLevel - upg.level);
+
+                btn.innerText = buyMultiplier === -1 ? `買最大 (${amount})` : `升級 x${amount}`;
+                let totalCost = getTotalCost(upg, amount);
+                btn.disabled = costRes.amount < totalCost;
+            }
         }
     });
 
@@ -552,7 +643,11 @@ function executePrestige() {
         });
         Object.keys(gameState.upgrades).forEach(k => {
             if (!k.startsWith('pres_')) {
-                gameState.upgrades[k].level = (k === 'recycle_amount') ? 1 : 0;
+                if (k === 'recycle_amount' || k === 'recycle_boost' || k === 'recycle_material_amount' || k === 'recycle_material_boost') {
+                    gameState.upgrades[k].level = 1;
+                } else {
+                    gameState.upgrades[k].level = 0;
+                }
             } else if (k === 'pres_recycle_efficiency') {
                 gameState.upgrades[k].level = 0;
             }
