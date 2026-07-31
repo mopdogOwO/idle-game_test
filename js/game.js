@@ -15,7 +15,7 @@ window.addEventListener('keydown', (e) => {
     if (key === 'z') buyMultiplier = 10;
     if (key === 'x') buyMultiplier = 100;
     if (key === 'c') buyMultiplier = -1; // -1 代表 Max
-    updateDynamicValues(); // 按下時立即更新 UI 文字與狀態
+    updateDynamicValues(); 
 });
 
 window.addEventListener('keyup', (e) => {
@@ -70,29 +70,47 @@ function toggleNumberFormat(isChecked) {
 
 // ==================== 1. 核心邏輯 ====================
 
-// 等比級數公式：計算購買 N 級的總代價
+// 等比級數公式：計算購買 N 級的總代價 (強化防禦)
 function getTotalCost(upg, amount) {
-    const L = upg.level;
-    const B = upg.baseCost;
-    const r = upg.multiplier;
-    if (r === 1) return B * amount;
+    if (!upg || amount <= 0) return 0;
+    const L = upg.level || 0;
+    const B = upg.baseCost || 0;
+    const r = upg.multiplier || 1.0; 
+    
+    // 如果係數為 1 (例如解鎖項)，直接用簡易乘法
+    if (r < 1.0001) return B * amount;
+
     // 公式: B * r^L * (r^n - 1) / (r - 1)
-    return Math.floor(B * Math.pow(r, L) * (Math.pow(r, amount) - 1) / (r - 1));
+    let total = Math.floor(B * Math.pow(r, L) * (Math.pow(r, amount) - 1) / (r - 1));
+    return (isNaN(total) || total < 0) ? Infinity : total; 
 }
 
-// 反推公式：現有資源最多能買幾級
+// 反推公式：現有資源最多能買幾級 (強化防禦)
 function getMaxAffordable(upg, resAmount) {
-    const L = upg.level;
-    const B = upg.baseCost;
-    const r = upg.multiplier;
-    const R = resAmount;
+    if (!upg || resAmount <= 0) return 0;
+    const L = upg.level || 0;
+    const B = upg.baseCost || 0;
+    const r = upg.multiplier || 1.0;
+    const R = resAmount || 0;
+    
+    // 先檢查是否連一等都買不起
     if (R < getUpgradeCost(upg)) return 0;
-    // 公式: n = log_r( (R*(r-1)/(B*r^L)) + 1 )
-    let maxN = Math.floor(Math.log((R * (r - 1) / (B * Math.pow(r, L))) + 1) / Math.log(r));
-    if (upg.maxLevel !== null && upg.maxLevel !== Infinity) {
+
+    let maxN = 0;
+    // 嚴格判定倍率為 1 的情況 ( Nah BUG 修復核心 )
+    if (r < 1.0001) {
+        maxN = Math.floor(R / B);
+    } else {
+        // 公式: n = log_r( (R*(r-1)/(B*r^L)) + 1 )
+        maxN = Math.floor(Math.log((R * (r - 1) / (B * Math.pow(r, L))) + 1) / Math.log(r));
+    }
+    
+    // 限制在最大等級內
+    if (upg.maxLevel !== null && upg.maxLevel !== undefined && upg.maxLevel !== Infinity) {
         maxN = Math.min(maxN, upg.maxLevel - L);
     }
-    return Math.max(0, maxN);
+    
+    return (isNaN(maxN) || maxN < 0) ? 0 : maxN;
 }
 
 function addResource(resId, amount) {
@@ -108,7 +126,9 @@ function getMaxOfflineTime() {
 }
 
 function getUpgradeCost(upg) {
-    return Math.floor(upg.baseCost * Math.pow(upg.multiplier, upg.level));
+    if (!upg) return 0;
+    const r = upg.multiplier || 1.0;
+    return Math.floor(upg.baseCost * Math.pow(r, upg.level));
 }
 
 function getRobotYield(robotId) {
@@ -133,8 +153,10 @@ function getRobotYield(robotId) {
 
     if (robotMapping[robotId]) {
         [upgKey, presUpgKey] = robotMapping[robotId];
-        let level = gameState.upgrades[upgKey]?.level || 0;
-        yieldAmount = level >= 500 ? 700 : yieldAmount + level;
+        // 核心修改：直接採用等級作為基礎產量 (Lv 1 = 1倍)
+        let level = gameState.upgrades[upgKey]?.level || 1;
+        yieldAmount = level >= 500 ? 700 : level; 
+        
         let presLevel = gameState.upgrades[presUpgKey]?.level || 1;
         yieldAmount *= presLevel;
     }
@@ -154,15 +176,17 @@ function getRobotInterval(robotId) {
 }
 
 function getRobotTotalCount(robotId) {
-    let count = gameState.robots[robotId].baseCount || 0;
+    // 核心修改：直接採用升級等級作為數量 (Lv 1 = 1台)
     const countUpgMapping = {
         sweeper: 'leaf_count', branchCollector: 'branch_count', lumberjack: 'wood_count',
         pineSweeper: 'pine_leaf_count', pineBranchCollector: 'pine_branch_count', pineLumberjack: 'pine_wood_count',
         broadSweeper: 'broad_leaf_count', broadBranchCollector: 'broad_branch_count', broadLumberjack: 'broad_wood_count',
         sakuraSweeper: 'sakura_leaf_count', sakuraBranchCollector: 'sakura_branch_count', sakuraLumberjack: 'sakura_wood_count'
     };
-    if (countUpgMapping[robotId]) count += (gameState.upgrades[countUpgMapping[robotId]]?.level || 0);
-    return count;
+    if (countUpgMapping[robotId]) {
+        return gameState.upgrades[countUpgMapping[robotId]]?.level || 0;
+    }
+    return gameState.robots[robotId].baseCount || 0;
 }
 
 function getRecycleInterval() {
@@ -206,6 +230,7 @@ function gameLoop() {
 }
 
 function processTick(deltaTime) {
+    // 機器人產出
     Object.values(gameState.robots).forEach(bot => {
         if (!bot.unlocked) return;
         let isMapUnlocked = (bot.map === 'map1') 
@@ -227,6 +252,7 @@ function processTick(deltaTime) {
         }
     });
 
+    // 回收廠邏輯 (已優化效能)
     if (gameState.unlockedRecycle) {
         let recInterval = getRecycleInterval();
         gameState.recycleTimer = (gameState.recycleTimer || 0) + deltaTime;
@@ -235,7 +261,7 @@ function processTick(deltaTime) {
             let cycles = Math.floor(gameState.recycleTimer / recInterval);
             gameState.recycleTimer %= recInterval;
             
-            let factoryTimes = 1 + (gameState.upgrades.recycle_factory?.level || 0);
+            let factoryTimes = (gameState.upgrades.recycle_factory?.level || 1);
             let totalCycles = cycles * factoryTimes;
 
             let effLv = (gameState.upgrades.recycle_efficiency?.level || 0) + (gameState.upgrades.pres_recycle_efficiency?.level || 0);
@@ -516,12 +542,14 @@ function buyUpgrade(upgradeId) {
 }
 
 function updateDynamicValues() {
+    // 資源更新
     Object.values(gameState.resources).forEach(res => {
         if (!res.unlocked) return;
         const el = document.getElementById(`res-val-${res.id}`);
         if (el) el.innerText = formatNumber(res.amount);
     });
 
+    // 機器人 UI 更新
     Object.values(gameState.robots).forEach(bot => {
         if (!bot.unlocked) return;
         let totalCount = getRobotTotalCount(bot.id);
@@ -537,6 +565,7 @@ function updateDynamicValues() {
         }
     });
 
+    // 回收廠 UI 更新
     if (gameState.unlockedRecycle) {
         let recInterval = getRecycleInterval();
         const timerEl = document.getElementById('recycle-timer-desc');
@@ -546,7 +575,7 @@ function updateDynamicValues() {
 
         let effLv = (gameState.upgrades.recycle_efficiency?.level || 0) + (gameState.upgrades.pres_recycle_efficiency?.level || 0);
         let discountMultiplier = Math.max(0, 1 - (effLv * 0.01));
-        let factoryTimes = 1 + (gameState.upgrades.recycle_factory?.level || 0);
+        let factoryTimes = (gameState.upgrades.recycle_factory?.level || 1);
 
         Object.values(gameState.recycles).forEach(rec => {
             const titleEl = document.getElementById(`rec-title-${rec.id}`);
@@ -572,7 +601,7 @@ function updateDynamicValues() {
         });
     }
 
-    // 🔮 升級按鈕狀態與文字更新 (快捷鍵連動) 🔮
+    // 升級按鈕狀態與文字更新
     let activeCategory = 'leaf';
     if (gameState.currentView === 'map1') activeCategory = activeTabMap1;
     else if (gameState.currentView === 'map2') activeCategory = activeTabMap2;
@@ -593,12 +622,21 @@ function updateDynamicValues() {
             } else {
                 let amount = buyMultiplier;
                 if (buyMultiplier === -1) amount = getMaxAffordable(upg, costRes.amount);
-                if (amount <= 0) amount = 1; 
-                if (upg.maxLevel !== Infinity) amount = Math.min(amount, upg.maxLevel - upg.level);
+                if (isNaN(amount) || amount <= 0) amount = 0; 
+                
+                if (buyMultiplier !== -1 && upg.maxLevel !== Infinity) {
+                    amount = Math.min(amount, upg.maxLevel - upg.level);
+                }
 
-                btn.innerText = buyMultiplier === -1 ? `買最大 (${amount})` : `升級 x${amount}`;
-                let totalCost = getTotalCost(upg, amount);
-                btn.disabled = costRes.amount < totalCost;
+                let displayAmount = (buyMultiplier === -1) ? amount : buyMultiplier;
+                if (upg.maxLevel !== Infinity) displayAmount = Math.min(displayAmount, upg.maxLevel - upg.level);
+                
+                btn.innerText = buyMultiplier === -1 ? `買最大 (${amount})` : `升級 x${displayAmount}`;
+                
+                let checkAmount = (buyMultiplier === -1) ? 1 : buyMultiplier; 
+                if (upg.maxLevel !== Infinity) checkAmount = Math.min(checkAmount, upg.maxLevel - upg.level);
+                let totalCost = getTotalCost(upg, checkAmount);
+                btn.disabled = costRes.amount < totalCost || (buyMultiplier === -1 && amount <= 0) || (buyMultiplier !== -1 && checkAmount <= 0);
             }
         }
     });
@@ -638,12 +676,13 @@ function executePrestige() {
         });
         Object.keys(gameState.robots).forEach(k => {
             gameState.robots[k].unlocked = (k === 'sweeper');
-            gameState.robots[k].baseCount = (k === 'sweeper') ? 1 : 0;
+            gameState.robots[k].baseCount = 0;
             gameState.robots[k].currentTimer = 0;
         });
         Object.keys(gameState.upgrades).forEach(k => {
             if (!k.startsWith('pres_')) {
-                if (k === 'recycle_amount' || k === 'recycle_boost' || k === 'recycle_material_amount' || k === 'recycle_material_boost') {
+                // 重置邏輯：產量、數量、回收基礎與倍率回歸 1，其餘回歸 0
+                if (k.endsWith('_amount') || k.endsWith('_count') || k === 'recycle_amount' || k === 'recycle_boost' || k === 'recycle_material_amount' || k === 'recycle_material_boost') {
                     gameState.upgrades[k].level = 1;
                 } else {
                     gameState.upgrades[k].level = 0;
@@ -683,20 +722,20 @@ function mergeSaveData(saved, template) {
 
 function restoreUnlocksFromUpgrades() {
     const u = gameState.upgrades;
-    if (u.unlock_branch_robot?.level > 0) { gameState.resources.branch.unlocked = true; gameState.robots.branchCollector.unlocked = true; if (!gameState.robots.branchCollector.baseCount) gameState.robots.branchCollector.baseCount = 1; }
-    if (u.unlock_wood_robot?.level > 0) { gameState.resources.wood.unlocked = true; gameState.robots.lumberjack.unlocked = true; if (!gameState.robots.lumberjack.baseCount) gameState.robots.lumberjack.baseCount = 1; }
+    if (u.unlock_branch_robot?.level > 0) { gameState.resources.branch.unlocked = true; gameState.robots.branchCollector.unlocked = true; }
+    if (u.unlock_wood_robot?.level > 0) { gameState.resources.wood.unlocked = true; gameState.robots.lumberjack.unlocked = true; }
     if (u.unlock_recycle_branch?.level > 0) { gameState.unlockedRecycle = true; gameState.resources.recycle_coin.unlocked = true; }
-    if (u.unlock_pine_robot?.level > 0) { gameState.resources.pine_leaf.unlocked = true; gameState.robots.pineSweeper.unlocked = true; if (!gameState.robots.pineSweeper.baseCount) gameState.robots.pineSweeper.baseCount = 1; }
+    if (u.unlock_pine_robot?.level > 0) { gameState.resources.pine_leaf.unlocked = true; gameState.robots.pineSweeper.unlocked = true; }
     if (u.unlock_map2?.level > 0) gameState.unlockedMap2 = true;
-    if (u.unlock_pine_branch_robot?.level > 0) { gameState.resources.pine_branch.unlocked = true; gameState.robots.pineBranchCollector.unlocked = true; if (!gameState.robots.pineBranchCollector.baseCount) gameState.robots.pineBranchCollector.baseCount = 1; }
-    if (u.unlock_pine_wood_robot?.level > 0) { gameState.resources.pine_wood.unlocked = true; gameState.robots.pineLumberjack.unlocked = true; if (!gameState.robots.pineLumberjack.baseCount) gameState.robots.pineLumberjack.baseCount = 1; }
+    if (u.unlock_pine_branch_robot?.level > 0) { gameState.resources.pine_branch.unlocked = true; gameState.robots.pineBranchCollector.unlocked = true; }
+    if (u.unlock_pine_wood_robot?.level > 0) { gameState.resources.pine_wood.unlocked = true; gameState.robots.pineLumberjack.unlocked = true; }
     if (u.unlock_prestige?.level > 0) { gameState.unlockedPrestige = true; gameState.resources.prestige_coin.unlocked = true; }
-    if (u.unlock_broad_robot?.level > 0) { gameState.resources.broad_leaf.unlocked = true; gameState.robots.broadSweeper.unlocked = true; if (!gameState.robots.broadSweeper.baseCount) gameState.robots.broadSweeper.baseCount = 1; }
-    if (u.unlock_broad_branch_robot?.level > 0) { gameState.resources.broad_branch.unlocked = true; gameState.robots.broadBranchCollector.unlocked = true; if (!gameState.robots.broadBranchCollector.baseCount) gameState.robots.broadBranchCollector.baseCount = 1; }
-    if (u.unlock_broad_wood_robot?.level > 0) { gameState.resources.broad_wood.unlocked = true; gameState.robots.broadLumberjack.unlocked = true; if (!gameState.robots.broadLumberjack.baseCount) gameState.robots.broadLumberjack.baseCount = 1; }
-    if (u.unlock_sakura_robot?.level > 0) { gameState.resources.sakura_leaf.unlocked = true; gameState.robots.sakuraSweeper.unlocked = true; if (!gameState.robots.sakuraSweeper.baseCount) gameState.robots.sakuraSweeper.baseCount = 1; }
-    if (u.unlock_sakura_branch_robot?.level > 0) { gameState.resources.sakura_branch.unlocked = true; gameState.robots.sakuraBranchCollector.unlocked = true; if (!gameState.robots.sakuraBranchCollector.baseCount) gameState.robots.sakuraBranchCollector.baseCount = 1; }
-    if (u.unlock_sakura_wood_robot?.level > 0) { gameState.resources.sakura_wood.unlocked = true; gameState.robots.sakuraLumberjack.unlocked = true; if (!gameState.robots.sakuraLumberjack.baseCount) gameState.robots.sakuraLumberjack.baseCount = 1; }
+    if (u.unlock_broad_robot?.level > 0) { gameState.resources.broad_leaf.unlocked = true; gameState.robots.broadSweeper.unlocked = true; }
+    if (u.unlock_broad_branch_robot?.level > 0) { gameState.resources.broad_branch.unlocked = true; gameState.robots.broadBranchCollector.unlocked = true; }
+    if (u.unlock_broad_wood_robot?.level > 0) { gameState.resources.broad_wood.unlocked = true; gameState.robots.broadLumberjack.unlocked = true; }
+    if (u.unlock_sakura_robot?.level > 0) { gameState.resources.sakura_leaf.unlocked = true; gameState.robots.sakuraSweeper.unlocked = true; }
+    if (u.unlock_sakura_branch_robot?.level > 0) { gameState.resources.sakura_branch.unlocked = true; gameState.robots.sakuraBranchCollector.unlocked = true; }
+    if (u.unlock_sakura_wood_robot?.level > 0) { gameState.resources.sakura_wood.unlocked = true; gameState.robots.sakuraLumberjack.unlocked = true; }
     if (u.unlock_map3?.level > 0) gameState.unlockedMap3 = true;
     if (u.unlock_map4?.level > 0) gameState.unlockedMap4 = true;
 }
