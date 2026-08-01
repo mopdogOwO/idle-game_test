@@ -209,7 +209,7 @@ function calculatePrestigeCoinGain() {
                  + (r.sakura_leaf.lifetimeAmount || 0) * 0.000016
                  + (r.sakura_branch.lifetimeAmount || 0) * 0.000048
                  + (r.sakura_wood.lifetimeAmount || 0) * 0.00008
-                 + (r.recycle_coin.lifetimeAmount || 0) * 0.002;
+                 + (r.recycle_coin.lifetimeAmount || 0) * 0.0005;
 
     let bonusMultiplier = 1 + ((gameState.upgrades.pres_coin_boost?.level || 0) * 0.01);
     return Math.round(rawCoins * bonusMultiplier);
